@@ -13,3 +13,4 @@ On peut changer d'avis : on écrit alors une nouvelle note qui remplace l'ancien
 | [0006](0006-montants-quantites-arrondi.md) | Montants, quantités et règles d'arrondi (RG3) | Acceptée |
 | [0007](0007-i18n.md) | Internationalisation (next-intl) | Acceptée |
 | [0008](0008-migrations-distantes.md) | Migrations appliquées au projet distant sans Docker | Acceptée |
+| [0009](0009-administration-des-comptes.md) | Administration des comptes : fonctions serveur, mots de passe provisoires, désactivation, journal | Acceptée |

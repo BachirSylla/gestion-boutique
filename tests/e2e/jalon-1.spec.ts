@@ -70,7 +70,7 @@ test.describe("propriétaire connecté", () => {
     await login(page, `+221 ${owner.phoneInput}`, owner.password);
     await expect(page.getByRole("heading", { name: `Bonjour ${owner.fullName}` })).toBeVisible();
     await expect(page.getByText("Vos 2 boutiques")).toBeVisible();
-    await expect(page.getByText("Boutique Keur Fatou")).toBeVisible();
+    await expect(page.getByRole("main").getByText("Boutique Keur Fatou")).toBeVisible();
 
     for (const { name, width, height } of WIDTHS) {
       await page.setViewportSize({ width, height });

@@ -4,6 +4,40 @@
     "tagline": "Le carnet du boutiquier",
     "description": "Les comptes de vos clients et votre stock, en sécurité, même sans réseau."
   },
+  "common": {
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré.",
+    "cancel": "Annuler",
+    "back": "Retour",
+    "create": "Créer",
+    "creating": "Création…",
+    "confirm": "Confirmer",
+    "optional": "facultatif",
+    "copy": "Copier",
+    "copied": "Copié",
+    "close": "Fermer",
+    "edit": "Modifier",
+    "none": "Aucune",
+    "phonePlaceholder": "77 123 45 67"
+  },
+  "errors": {
+    "forbidden": "Vous n'avez pas le droit de faire cette action.",
+    "phoneTaken": "Ce numéro a déjà un compte Bitig.",
+    "invalidPhone": "Ce numéro n'est pas valide. Exemple : 77 123 45 67.",
+    "nameRequired": "Le nom est obligatoire.",
+    "shopRequired": "Choisissez au moins une boutique.",
+    "roleRequired": "Choisissez un rôle.",
+    "invalidInput": "Vérifiez les champs signalés.",
+    "passwordTooShort": "Le mot de passe doit faire au moins 8 caractères.",
+    "passwordTooLong": "Le mot de passe est trop long (72 caractères au plus).",
+    "passwordMismatch": "Les deux mots de passe ne sont pas identiques.",
+    "passwordUnchanged": "Choisissez un mot de passe différent de l'actuel.",
+    "currentPasswordWrong": "Le mot de passe actuel est incorrect.",
+    "notFound": "Élément introuvable.",
+    "unexpected": "Une erreur est survenue. Réessayez.",
+    "offline": "Pas de réseau. Cette action demande une connexion."
+  },
   "auth": {
     "login": {
       "title": "Connexion",
@@ -37,14 +71,163 @@
       "manager": "Gérant",
       "accountant": "Comptable",
       "platformAdmin": "Administrateur Bitig"
+    },
+    "roleHints": {
+      "manager": "Saisit les prises, versements et le stock de ses boutiques.",
+      "accountant": "Consulte les comptes et les rapports, sans rien modifier."
+    },
+    "status": {
+      "active": "Actif",
+      "disabled": "Désactivé",
+      "suspended": "Suspendu",
+      "mustChangePassword": "Mot de passe provisoire"
     }
+  },
+  "nav": {
+    "label": "Navigation principale",
+    "home": "Accueil",
+    "admin": "Propriétaires",
+    "team": "Équipe",
+    "shops": "Boutiques",
+    "account": "Mon compte"
+  },
+  "shell": {
+    "currentShop": "Boutique",
+    "switchShop": "Changer de boutique",
+    "noShop": "Aucune boutique"
   },
   "home": {
     "greeting": "Bonjour {name}",
     "yourShops": "{count, plural, =0 {Aucune boutique} one {Votre boutique} other {Vos # boutiques}}",
     "noShop": "Aucune boutique pour l'instant.",
-    "adminIntro": "Espace administrateur : la création des propriétaires et de leurs boutiques arrive au prochain jalon.",
+    "currentShop": "Vous travaillez sur : {shop}",
+    "adminIntro": "Créez les comptes des propriétaires et leurs boutiques depuis la page Propriétaires.",
+    "adminCta": "Voir les propriétaires",
+    "ownerTeamCta": "Gérer mon équipe",
     "comingSoon": "Les clients, les prises et le stock arrivent aux prochains jalons."
+  },
+  "credentials": {
+    "title": "Identifiants à transmettre",
+    "intro": "Donnez ces identifiants à {name}. Le mot de passe provisoire ne sera plus affiché : il devra être changé à la première connexion.",
+    "phone": "Numéro",
+    "password": "Mot de passe provisoire",
+    "copy": "Copier le message",
+    "whatsapp": "Envoyer par WhatsApp",
+    "message": "Bonjour {name}, voici votre accès à Bitig.\nAdresse : {url}\nNuméro : {phone}\nMot de passe provisoire : {password}\nVous choisirez votre propre mot de passe à la première connexion."
+  },
+  "admin": {
+    "title": "Propriétaires",
+    "intro": "Les comptes clients de la plateforme et leurs boutiques.",
+    "newOwner": "Nouveau propriétaire",
+    "empty": "Aucun propriétaire pour l'instant.",
+    "owner": "Propriétaire",
+    "shopsCount": "{count, plural, =0 {Aucune boutique} one {# boutique} other {# boutiques}}",
+    "createdOn": "Créé le {date}",
+    "create": {
+      "title": "Nouveau propriétaire",
+      "intro": "Un compte est créé avec un mot de passe provisoire, à transmettre au propriétaire.",
+      "ownerSection": "Le propriétaire",
+      "ownerName": "Nom complet",
+      "ownerPhone": "Numéro de téléphone",
+      "tenantName": "Nom du compte",
+      "tenantNameHint": "Par défaut, le nom du propriétaire.",
+      "shopSection": "Première boutique",
+      "shopSectionHint": "Facultatif : le propriétaire pourra en créer lui-même.",
+      "submit": "Créer le propriétaire",
+      "done": "Propriétaire créé.",
+      "openDetail": "Voir sa fiche"
+    },
+    "detail": {
+      "shops": "Boutiques",
+      "addShop": "Ajouter une boutique",
+      "noShop": "Aucune boutique.",
+      "account": "Compte",
+      "suspend": "Suspendre le propriétaire",
+      "suspendConfirm": "Le propriétaire et ses employés ne pourront plus rien consulter ni saisir. Leurs données sont conservées. Confirmer ?",
+      "reactivate": "Réactiver le propriétaire",
+      "resetPassword": "Réinitialiser le mot de passe",
+      "resetConfirm": "Un nouveau mot de passe provisoire va remplacer l'actuel. Confirmer ?",
+      "suspendedNotice": "Ce propriétaire est suspendu : ni lui ni ses employés n'ont accès à leurs données.",
+      "journal": "Journal du compte"
+    }
+  },
+  "team": {
+    "title": "Équipe",
+    "intro": "Vos gérants et comptables, et les boutiques qu'ils tiennent.",
+    "newMember": "Ajouter un employé",
+    "empty": "Aucun employé pour l'instant.",
+    "you": "Vous",
+    "shopsOf": "{count, plural, =0 {Aucune boutique} one {# boutique} other {# boutiques}}",
+    "create": {
+      "title": "Ajouter un employé",
+      "intro": "Un compte est créé avec un mot de passe provisoire, à lui transmettre.",
+      "fullName": "Nom complet",
+      "phone": "Numéro de téléphone",
+      "role": "Rôle",
+      "shops": "Boutiques",
+      "shopsHint": "L'employé ne verra que ces boutiques.",
+      "submit": "Créer le compte",
+      "done": "Compte créé.",
+      "another": "Ajouter un autre employé"
+    },
+    "detail": {
+      "shops": "Boutiques rattachées",
+      "saveShops": "Enregistrer les boutiques",
+      "shopsSaved": "Boutiques enregistrées.",
+      "account": "Compte",
+      "disable": "Désactiver le compte",
+      "disableConfirm": "Cet employé ne pourra plus se connecter. Son historique est conservé. Confirmer ?",
+      "enable": "Réactiver le compte",
+      "resetPassword": "Réinitialiser le mot de passe",
+      "resetConfirm": "Un nouveau mot de passe provisoire va remplacer l'actuel. Confirmer ?",
+      "disabledNotice": "Ce compte est désactivé : la personne ne peut plus se connecter."
+    }
+  },
+  "shops": {
+    "title": "Boutiques",
+    "intro": "Chaque boutique a son stock, ses prix, ses clients et ses réglages.",
+    "new": "Nouvelle boutique",
+    "empty": "Aucune boutique pour l'instant.",
+    "current": "Boutique courante",
+    "fields": {
+      "name": "Nom de la boutique",
+      "district": "Quartier",
+      "city": "Ville",
+      "phone": "Téléphone de la boutique"
+    },
+    "created": "Boutique créée.",
+    "edit": "Modifier la boutique"
+  },
+  "account": {
+    "title": "Mon compte",
+    "identity": "Identité",
+    "changePassword": "Changer mon mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "newPasswordHint": "Au moins 8 caractères.",
+    "confirmPassword": "Confirmer le nouveau mot de passe",
+    "submit": "Changer le mot de passe",
+    "changed": "Mot de passe changé.",
+    "first": {
+      "title": "Choisissez votre mot de passe",
+      "intro": "Bienvenue {name}. Vous vous êtes connecté avec un mot de passe provisoire : choisissez maintenant le vôtre. Vous seul le connaîtrez.",
+      "submit": "Enregistrer et continuer"
+    }
+  },
+  "events": {
+    "tenant_created": "Compte propriétaire créé",
+    "tenant_suspended": "Propriétaire suspendu",
+    "tenant_reactivated": "Propriétaire réactivé",
+    "shop_created": "Boutique créée",
+    "member_created": "Compte créé : {target}",
+    "member_disabled": "Compte désactivé : {target}",
+    "member_enabled": "Compte réactivé : {target}",
+    "member_shops_changed": "Boutiques modifiées : {target}",
+    "password_reset": "Mot de passe réinitialisé : {target}",
+    "password_changed": "Mot de passe changé : {target}",
+    "by": "par {actor}",
+    "platformAdmin": "l'administrateur Bitig",
+    "someone": "un compte"
   },
   "connectivity": {
     "offline": "Hors ligne",

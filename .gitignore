@@ -30,3 +30,6 @@ Thumbs.db
 # Tests de bout en bout
 test-results/
 playwright-report/
+
+# Généré par next-intl au build (types des messages)
+messages/*.d.json.ts

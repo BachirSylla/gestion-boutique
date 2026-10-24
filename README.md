@@ -40,6 +40,15 @@ pnpm admin:bootstrap -- --phone "77 614 89 91" --name "Prénom Nom"
 
 Le mot de passe (8 caractères minimum) est demandé deux fois dans le terminal, sans être affiché ni enregistré. Le script est idempotent : relancé, il confirme que le compte existe et qu'il est administrateur. On se connecte ensuite sur `/login` avec le numéro et ce mot de passe.
 
+## Comptes (jalon 2)
+
+- **Administrateur** (`/admin`) : crée un propriétaire, son compte et sa première boutique ; ajoute des boutiques ; réinitialise le mot de passe du propriétaire ; suspend ou réactive le propriétaire.
+- **Propriétaire** (`/team`, `/shops`) : crée ses gérants et comptables, choisit leurs boutiques, les désactive, réinitialise leur mot de passe ; crée et modifie ses boutiques.
+- Chaque compte créé reçoit un **mot de passe provisoire**, affiché une seule fois (copie ou envoi WhatsApp), à changer à la première connexion.
+- **Mon compte** (`/account`) : changement de mot de passe.
+
+Détails : [docs/decisions/0009](docs/decisions/0009-administration-des-comptes.md).
+
 ## Organisation
 
 ```

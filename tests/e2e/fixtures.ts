@@ -23,6 +23,7 @@ export interface E2eFixture {
   shopIds: string[];
   owner: E2eUser;
   disabledManager: E2eUser;
+  platformAdmin: E2eUser;
 }
 
 export function admin() {
@@ -35,6 +36,12 @@ function check<T>(result: { data: T | null; error: unknown }): T {
   if (result.error) throw result.error;
   if (result.data === null) throw new Error("Réponse vide de Supabase");
   return result.data;
+}
+
+/** Numéro de test aléatoire (préfixe 709), en E.164 et en saisie « humaine ». */
+export function randomTestPhone(): { phone: string; phoneInput: string } {
+  const national = `709${String(randomInt(0, 1_000_000)).padStart(6, "0")}`;
+  return { phone: `+221${national}`, phoneInput: `${national.slice(0, 2)} ${national.slice(2, 5)} ${national.slice(5, 7)} ${national.slice(7)}` };
 }
 
 async function createUser(fullName: string): Promise<E2eUser> {
@@ -85,7 +92,10 @@ export async function createFixture(): Promise<E2eFixture> {
   );
   checkOk(await db.from("shop_members").insert({ shop_id: shops[0]!.id, user_id: disabledManager.id, tenant_id: tenantId }));
 
-  const fixture = { tenantId, shopIds: shops.map((s) => s.id), owner, disabledManager };
+  const platformAdmin = await createUser("Admin Bitig");
+  checkOk(await db.from("platform_admins").insert({ user_id: platformAdmin.id, full_name: platformAdmin.fullName, phone_e164: platformAdmin.phone }));
+
+  const fixture = { tenantId, shopIds: shops.map((s) => s.id), owner, disabledManager, platformAdmin };
   mkdirSync("test-results", { recursive: true });
   writeFileSync(FIXTURE_FILE, JSON.stringify(fixture));
   return fixture;
@@ -101,6 +111,7 @@ export async function cleanupFixtures(): Promise<void> {
   const tenants = check(await db.from("tenants").select("id").like("name", `${E2E_TENANT_PREFIX}%`));
   for (const { id: tenantId } of tenants) {
     const profiles = check(await db.from("profiles").select("user_id").eq("tenant_id", tenantId));
+    checkOk(await db.from("account_events").delete().eq("tenant_id", tenantId));
     checkOk(await db.from("shop_members").delete().eq("tenant_id", tenantId));
     checkOk(await db.from("profile_contacts").delete().eq("tenant_id", tenantId));
     checkOk(await db.from("profiles").delete().eq("tenant_id", tenantId));
@@ -114,7 +125,14 @@ export async function cleanupFixtures(): Promise<void> {
   // Comptes Auth de test restés sans profil (exécution interrompue).
   const { data, error } = await db.auth.admin.listUsers({ perPage: 1000 });
   if (error) throw error;
-  for (const user of data.users.filter((u) => u.user_metadata?.e2e === true)) {
+  const e2eUsers = data.users.filter((u) => u.user_metadata?.e2e === true);
+  const ids = e2eUsers.map((u) => u.id);
+  if (ids.length) {
+    checkOk(await db.from("account_events").delete().in("actor_id", ids));
+    checkOk(await db.from("account_events").delete().in("target_user_id", ids));
+    checkOk(await db.from("platform_admins").delete().in("user_id", ids));
+  }
+  for (const user of e2eUsers) {
     const { error: deleteError } = await db.auth.admin.deleteUser(user.id);
     if (deleteError) throw deleteError;
   }
