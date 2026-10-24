@@ -17,6 +17,6 @@ Ces deux mécanismes ne couvrent pas une **ouverture à froid** hors ligne (rech
 ## Choix
 - **Serwist (`@serwist/turbopack`)** : le service worker (`src/app/sw.ts`) est servi par une route `/serwist/sw.js`. Il précache les ressources statiques et met en cache les pages visitées, avec une page de secours hors ligne.
 - **`experimental.useOffline`** activé : indicateur de connexion fiable (plus que `navigator.onLine`) et reprise des Server Actions.
-- **`cacheComponents` désactivé** : l'intégration Turbopack de Serwist ne le prend pas en charge, et l'application lit la session Supabase dans les cookies sur presque chaque page, ce qui obligerait à des frontières Suspense partout. `partialPrefetching` reste actif ; on utilise `loading.tsx` comme coquille hors ligne.
+- **`cacheComponents` désactivé** : l'intégration Turbopack de Serwist ne le prend pas en charge, et l'application lit la session Supabase dans les cookies sur presque chaque page, ce qui obligerait à des frontières Suspense partout. `partialPrefetching` exige `cacheComponents` : il est donc désactivé aussi, et chaque section a un `loading.tsx` qui sert de coquille préchargée hors ligne (comportement équivalent selon la documentation Next.js « Offline support », section « Without Cache Components »).
 
 Les **données** hors ligne (clients, soldes, catalogue) ne passent pas par le cache HTTP mais par IndexedDB (note 0002) : le service worker ne sert que la coquille de l'application.

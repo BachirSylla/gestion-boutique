@@ -16,8 +16,10 @@
     "db:push": "tsx scripts/db.ts push",
     "db:status": "tsx scripts/db.ts status",
     "db:types": "tsx scripts/db.ts types",
-    "admin:bootstrap": "tsx scripts/bootstrap-admin.ts",
-    "check:secrets": "tsx scripts/check-secrets.ts"
+    "admin:bootstrap": "tsx scripts/bootstrap-admin.mts",
+    "check:secrets": "tsx scripts/check-secrets.ts",
+    "icons": "tsx scripts/generate-icons.mts",
+    "auth:config": "tsx scripts/auth-config.mts"
   },
   "packageManager": "pnpm@11.0.9",
   "dependencies": {

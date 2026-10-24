@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+/* Jetons de design (CLAUDE.md §8.2). Les composants n'utilisent que ces jetons :
+   un mode sombre se fera en redéfinissant ces variables. */
+:root {
+  --vert-principal: #0e5a3a;
+  --vert-fonce: #0a4129;
+  --vert-doux: #e3f1e9;
+  --vert-positif: #0e6b44;
+  --safran: #f5b83d;
+  --safran-doux: #fff4dd;
+  --brique: #9a3412;
+  --brique-doux: #fbebe3;
+  --encre: #10231b;
+  --gris-texte: #5b6b63;
+  --fond: #f4f6f3;
+  --surface: #ffffff;
+  --bordure: #e3e8e4;
+  --bordure-champ: #d5ded8;
+}
+
+@theme inline {
+  --color-vert-principal: var(--vert-principal);
+  --color-vert-fonce: var(--vert-fonce);
+  --color-vert-doux: var(--vert-doux);
+  --color-vert-positif: var(--vert-positif);
+  --color-safran: var(--safran);
+  --color-safran-doux: var(--safran-doux);
+  --color-brique: var(--brique);
+  --color-brique-doux: var(--brique-doux);
+  --color-encre: var(--encre);
+  --color-gris-texte: var(--gris-texte);
+  --color-fond: var(--fond);
+  --color-surface: var(--surface);
+  --color-bordure: var(--bordure);
+  --color-bordure-champ: var(--bordure-champ);
+
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-carte: 18px;
+  --radius-bouton: 14px;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--fond);
+  color: var(--encre);
+  font-family: var(--font-sans);
+}
+
+/* Montants : chiffres tabulaires pour qu'ils s'alignent. */
+.montant {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 3px solid var(--safran);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
