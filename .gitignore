@@ -1,0 +1,28 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Dépendances et builds
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# PWA générée
+public/sw.js
+public/workbox-*.js
+public/swe-worker-*.js
+
+# Supabase CLI
+supabase/.temp/
+supabase/.branches/
+
+# Divers
+.DS_Store
+Thumbs.db
+*.log
+.vercel

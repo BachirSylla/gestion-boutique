@@ -1,0 +1,15 @@
+# Notes de décision
+
+Chaque choix structurant a sa note : contexte, options envisagées, choix, raison.
+On peut changer d'avis : on écrit alors une nouvelle note qui remplace l'ancienne (et on l'indique dans l'ancienne).
+
+| N° | Sujet | Statut |
+|---|---|---|
+| [0001](0001-socle-technique.md) | Socle technique : Next.js 16, pnpm, Tailwind 4, Vitest, Playwright | Acceptée |
+| [0002](0002-stockage-local-et-synchronisation.md) | Stockage local (Dexie / IndexedDB) et synchronisation maison | Acceptée (mise en œuvre au jalon 4) |
+| [0003](0003-pwa-hors-ligne.md) | PWA et hors ligne côté Next.js (Serwist, `useOffline`, pas de `cacheComponents`) | Acceptée |
+| [0004](0004-schema-et-rls.md) | Schéma multi-propriétaires et RLS ; tests d'isolation sur la base distante | Acceptée |
+| [0005](0005-connexion-par-telephone.md) | Connexion par téléphone via un e-mail interne `.invalid` | Acceptée |
+| [0006](0006-montants-quantites-arrondi.md) | Montants, quantités et règles d'arrondi (RG3) | Acceptée |
+| [0007](0007-i18n.md) | Internationalisation (next-intl) | Acceptée |
+| [0008](0008-migrations-distantes.md) | Migrations appliquées au projet distant sans Docker | Acceptée |

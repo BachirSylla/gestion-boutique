@@ -1,0 +1,53 @@
+{
+  "name": "bitig",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Bitig, le carnet du boutiquier",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --project domain",
+    "test:watch": "vitest --project domain",
+    "test:rls": "vitest run --project rls",
+    "test:e2e": "playwright test",
+    "db:push": "tsx scripts/db.ts push",
+    "db:status": "tsx scripts/db.ts status",
+    "db:types": "tsx scripts/db.ts types",
+    "admin:bootstrap": "tsx scripts/bootstrap-admin.ts",
+    "check:secrets": "tsx scripts/check-secrets.ts"
+  },
+  "packageManager": "pnpm@11.0.9",
+  "dependencies": {
+    "@serwist/turbopack": "^9.5.13",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.118.0",
+    "next": "16.4.3",
+    "next-intl": "^4.14.9",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "serwist": "^9.5.13",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@tailwindcss/turbopack": "^4.3.3",
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "dotenv": "^18.0.9",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.4.3",
+    "pg": "^8.23.1",
+    "supabase": "^2.121.0",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5"
+  }
+}
