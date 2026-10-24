@@ -40,6 +40,13 @@ export class Ctx {
     await this.db.query("select set_config('request.jwt.claims', '', true)");
   }
 
+  /** Agit comme le serveur (clé secrète → rôle service_role, sans auth.uid()). */
+  async asService(): Promise<void> {
+    await this.db.query("reset role");
+    await this.db.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ role: "service_role" })]);
+    await this.db.query("set local role service_role");
+  }
+
   /** Agit comme un utilisateur connecté (ou anonyme si userId est null). */
   async as(userId: string | null): Promise<void> {
     await this.db.query("reset role");

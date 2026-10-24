@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          shop_id: string | null
+          target_user_id: string | null
+          tenant_id: string | null
+          type: Database["public"]["Enums"]["account_event_type"]
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          shop_id?: string | null
+          target_user_id?: string | null
+          tenant_id?: string | null
+          type: Database["public"]["Enums"]["account_event_type"]
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          shop_id?: string | null
+          target_user_id?: string | null
+          tenant_id?: string | null
+          type?: Database["public"]["Enums"]["account_event_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_events_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_admins: {
         Row: {
           created_at: string
@@ -253,9 +301,86 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      srv_check_password_reset: {
+        Args: { p_actor: string; p_user_id: string }
+        Returns: string
+      }
+      srv_create_member: {
+        Args: {
+          p_actor: string
+          p_full_name: string
+          p_phone: string
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_shop_ids: string[]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      srv_create_shop: {
+        Args: {
+          p_actor: string
+          p_city?: string
+          p_district?: string
+          p_name: string
+          p_phone?: string
+          p_tenant_id: string
+        }
+        Returns: string
+      }
+      srv_create_tenant: {
+        Args: {
+          p_actor: string
+          p_owner_id: string
+          p_owner_name: string
+          p_owner_phone: string
+          p_shop_city?: string
+          p_shop_district?: string
+          p_shop_name?: string
+          p_tenant_name: string
+        }
+        Returns: string
+      }
+      srv_record_password_change: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      srv_record_password_reset: {
+        Args: { p_actor: string; p_user_id: string }
+        Returns: undefined
+      }
+      srv_set_member_shops: {
+        Args: { p_actor: string; p_shop_ids: string[]; p_user_id: string }
+        Returns: Json
+      }
+      srv_set_member_status: {
+        Args: {
+          p_actor: string
+          p_status: Database["public"]["Enums"]["account_status"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      srv_set_tenant_status: {
+        Args: {
+          p_actor: string
+          p_status: Database["public"]["Enums"]["tenant_status"]
+          p_tenant_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
+      account_event_type:
+        | "tenant_created"
+        | "tenant_suspended"
+        | "tenant_reactivated"
+        | "shop_created"
+        | "member_created"
+        | "member_disabled"
+        | "member_enabled"
+        | "member_shops_changed"
+        | "password_reset"
+        | "password_changed"
       account_status: "active" | "disabled"
       app_role: "owner" | "manager" | "accountant"
       tenant_status: "active" | "suspended"
@@ -386,6 +511,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_event_type: [
+        "tenant_created",
+        "tenant_suspended",
+        "tenant_reactivated",
+        "shop_created",
+        "member_created",
+        "member_disabled",
+        "member_enabled",
+        "member_shops_changed",
+        "password_reset",
+        "password_changed",
+      ],
       account_status: ["active", "disabled"],
       app_role: ["owner", "manager", "accountant"],
       tenant_status: ["active", "suspended"],
