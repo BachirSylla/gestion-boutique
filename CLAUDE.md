@@ -196,7 +196,7 @@ L'administrateur de la plateforme ne consulte pas le détail des comptes clients
 **Annulation**
 
 - Annuler = créer une opération d'annulation qui référence l'originale (motif facultatif). L'originale reste visible, marquée annulée.
-- Le **gérant** peut annuler **sa propre** opération librement pendant un délai réglable par boutique (**15 minutes par défaut**).
+- Le **gérant** peut annuler **sa propre** opération librement pendant un délai réglable par boutique (**15 minutes par défaut**, de 0 à **60 minutes**, modifiable à tout moment par le propriétaire ; le délai en vigueur au moment de l'annulation s'applique). Le délai se compte à l'**heure du serveur** (réception de l'opération → réception de l'annulation), pour ne pas dépendre de l'heure du téléphone. Hors ligne, une annulation arrivée hors délai devient une demande d'annulation, jamais une perte silencieuse.
 - Au-delà, ou pour l'opération d'un autre, il crée une **demande d'annulation** (motif obligatoire). Le **propriétaire** la valide ou la refuse ; la décision est tracée et notifiée dans l'application.
 - Le propriétaire peut annuler directement.
 - Une annulation ne s'annule pas. Pour rétablir, on ressaisit.
@@ -331,7 +331,9 @@ Exemple de test (baisse immédiate) :
 
 **Envoi** : sur mobile, partage direct du fichier (API de partage du navigateur) quand c'est disponible ; sinon téléchargement, puis envoi manuel dans WhatsApp. Un lien `wa.me` avec texte prérempli sert aux **relances** (texte seul).
 
-**Relance** : message prérempli, poli, avec le montant dû et la boutique, modifiable avant envoi.
+**Relance** : toujours **manuelle**. L'application liste les clients « À relancer » et prépare un message prérempli, poli, avec le montant dû et la boutique, modifiable avant envoi ; le boutiquier l'envoie lui-même.
+
+**Client mensuel à relancer** : quand une prise faite **jusqu'à la dernière échéance passée** reste impayée (prises jusqu'à l'échéance − tous les versements > 0). Les prises faites depuis l'échéance ne déclenchent pas de relance. Le message propose le total dû, modifiable.
 
 ---
 

@@ -62,6 +62,243 @@ export type Database = {
           },
         ]
       }
+      cancellation_requests: {
+        Row: {
+          cancellation_id: string | null
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          device_created_at: string
+          id: string
+          operation_id: string
+          reason: string
+          requested_by: string
+          shop_id: string
+          status: string
+        }
+        Insert: {
+          cancellation_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          device_created_at: string
+          id: string
+          operation_id: string
+          reason: string
+          requested_by: string
+          shop_id: string
+          status?: string
+        }
+        Update: {
+          cancellation_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          device_created_at?: string
+          id?: string
+          operation_id?: string
+          reason?: string
+          requested_by?: string
+          shop_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cancellation_requests_cancellation_id_fkey"
+            columns: ["cancellation_id"]
+            isOneToOne: false
+            referencedRelation: "customer_operations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cancellation_requests_operation_id_shop_id_fkey"
+            columns: ["operation_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_operations"
+            referencedColumns: ["id", "shop_id"]
+          },
+        ]
+      }
+      customer_operations: {
+        Row: {
+          amount: number | null
+          author_id: string
+          cancellation_reason: string | null
+          cancels_operation_id: string | null
+          customer_id: string
+          device_created_at: string
+          id: string
+          kind: string
+          note: string | null
+          payment_method_id: string | null
+          schema_version: number
+          server_created_at: string
+          shop_id: string
+          take_mode: string | null
+        }
+        Insert: {
+          amount?: number | null
+          author_id: string
+          cancellation_reason?: string | null
+          cancels_operation_id?: string | null
+          customer_id: string
+          device_created_at: string
+          id: string
+          kind: string
+          note?: string | null
+          payment_method_id?: string | null
+          schema_version?: number
+          server_created_at?: string
+          shop_id: string
+          take_mode?: string | null
+        }
+        Update: {
+          amount?: number | null
+          author_id?: string
+          cancellation_reason?: string | null
+          cancels_operation_id?: string | null
+          customer_id?: string
+          device_created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          payment_method_id?: string | null
+          schema_version?: number
+          server_created_at?: string
+          shop_id?: string
+          take_mode?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_operations_cancels_operation_id_customer_id_fkey"
+            columns: ["cancels_operation_id", "customer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_operations"
+            referencedColumns: ["id", "customer_id"]
+          },
+          {
+            foreignKeyName: "customer_operations_customer_id_shop_id_fkey"
+            columns: ["customer_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_balances"
+            referencedColumns: ["customer_id", "shop_id"]
+          },
+          {
+            foreignKeyName: "customer_operations_customer_id_shop_id_fkey"
+            columns: ["customer_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id", "shop_id"]
+          },
+          {
+            foreignKeyName: "customer_operations_payment_method_id_shop_id_fkey"
+            columns: ["payment_method_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id", "shop_id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          alert_threshold: number | null
+          archived_at: string | null
+          created_at: string
+          created_by: string | null
+          credit_limit: number | null
+          full_name: string
+          id: string
+          monthly_due_day: number | null
+          note: string | null
+          phone_e164: string | null
+          shop_id: string
+          type: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          alert_threshold?: number | null
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          credit_limit?: number | null
+          full_name: string
+          id: string
+          monthly_due_day?: number | null
+          note?: string | null
+          phone_e164?: string | null
+          shop_id: string
+          type: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          alert_threshold?: number | null
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          credit_limit?: number | null
+          full_name?: string
+          id?: string
+          monthly_due_day?: number | null
+          note?: string | null
+          phone_e164?: string | null
+          shop_id?: string
+          type?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_methods: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          kind: string
+          label: string | null
+          position: number
+          shop_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          kind: string
+          label?: string | null
+          position?: number
+          shop_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          kind?: string
+          label?: string | null
+          position?: number
+          shop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_methods_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_admins: {
         Row: {
           created_at: string
@@ -204,6 +441,47 @@ export type Database = {
           },
         ]
       }
+      shop_settings: {
+        Row: {
+          advance_alert_threshold: number
+          cancel_window_minutes: number
+          free_credit_reminder_days: number
+          monthly_due_day: number | null
+          rounding_step: number
+          shop_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          advance_alert_threshold?: number
+          cancel_window_minutes?: number
+          free_credit_reminder_days?: number
+          monthly_due_day?: number | null
+          rounding_step?: number
+          shop_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          advance_alert_threshold?: number
+          cancel_window_minutes?: number
+          free_credit_reminder_days?: number
+          monthly_due_day?: number | null
+          rounding_step?: number
+          shop_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_settings_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: true
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shops: {
         Row: {
           archived_at: string | null
@@ -260,6 +538,56 @@ export type Database = {
           },
         ]
       }
+      take_lines: {
+        Row: {
+          id: string
+          label: string
+          line_amount: number
+          operation_id: string
+          package_id: string | null
+          position: number
+          product_id: string | null
+          quantity_milli: number
+          shop_id: string
+          unit: string
+          unit_price: number
+        }
+        Insert: {
+          id?: string
+          label: string
+          line_amount: number
+          operation_id: string
+          package_id?: string | null
+          position: number
+          product_id?: string | null
+          quantity_milli: number
+          shop_id: string
+          unit: string
+          unit_price: number
+        }
+        Update: {
+          id?: string
+          label?: string
+          line_amount?: number
+          operation_id?: string
+          package_id?: string | null
+          position?: number
+          product_id?: string | null
+          quantity_milli?: number
+          shop_id?: string
+          unit?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "take_lines_operation_id_shop_id_fkey"
+            columns: ["operation_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_operations"
+            referencedColumns: ["id", "shop_id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           created_at: string
@@ -298,9 +626,79 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      customer_balances: {
+        Row: {
+          balance: number | null
+          customer_id: string | null
+          first_take_at: string | null
+          last_operation_at: string | null
+          last_payment_at: string | null
+          shop_id: string | null
+          total_paid: number | null
+          total_taken: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      cancel_operation: {
+        Args: {
+          p_device_created_at: string
+          p_id: string
+          p_operation_id: string
+          p_reason: string
+        }
+        Returns: Json
+      }
+      decide_cancellation: {
+        Args: {
+          p_approve: boolean
+          p_cancellation_id: string
+          p_note: string
+          p_request_id: string
+        }
+        Returns: Json
+      }
+      record_payment: {
+        Args: {
+          p_amount: number
+          p_customer_id: string
+          p_device_created_at: string
+          p_id: string
+          p_note: string
+          p_payment_method_id: string
+        }
+        Returns: Json
+      }
+      record_take: {
+        Args: {
+          p_amount: number
+          p_customer_id: string
+          p_device_created_at: string
+          p_id: string
+          p_lines: Json
+          p_mode: string
+          p_note: string
+        }
+        Returns: Json
+      }
+      request_cancellation: {
+        Args: {
+          p_device_created_at: string
+          p_id: string
+          p_operation_id: string
+          p_reason: string
+        }
+        Returns: Json
+      }
       srv_check_password_reset: {
         Args: { p_actor: string; p_user_id: string }
         Returns: string
