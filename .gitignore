@@ -26,3 +26,7 @@ supabase/.branches/
 Thumbs.db
 *.log
 .vercel
+
+# Tests de bout en bout
+test-results/
+playwright-report/

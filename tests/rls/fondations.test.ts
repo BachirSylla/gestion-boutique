@@ -68,7 +68,7 @@ describe("shops", () => {
       expect(await ctx.ids("select id from public.shops")).toEqual([]);
       await ctx.asSystem();
       const [row] = await ctx.rows<{ revoked_by: string }>("select revoked_by from public.shop_members where user_id = $1", [w.managerA1]);
-      expect(row.revoked_by).toBe(w.ownerA);
+      expect(row?.revoked_by).toBe(w.ownerA);
     }));
 
   it("le propriétaire crée et modifie ses boutiques, pas celles des autres", () =>
@@ -108,7 +108,7 @@ describe("shops", () => {
       const [shop] = await ctx.rows<{ created_by: string }>("insert into public.shops (tenant_id, name) values ($1, 'A3') returning created_by", [
         w.tenantA,
       ]);
-      expect(shop.created_by).toBe(w.ownerA);
+      expect(shop?.created_by).toBe(w.ownerA);
     }));
 });
 
