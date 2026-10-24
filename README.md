@@ -49,6 +49,17 @@ Le mot de passe (8 caractères minimum) est demandé deux fois dans le terminal,
 
 Détails : [docs/decisions/0009](docs/decisions/0009-administration-des-comptes.md).
 
+## Clients et journal (jalon 3)
+
+- **Clients** (`/customers`) : recherche instantanée, filtres par type, tri ; fiche avec solde, plafond, échéance, historique par jour.
+- **Prise** (rapide ou détaillée) et **versement** ; depuis l'accueil, « Nouvelle prise » → client → montant → enregistrer.
+- **Annulations** : libre pour le gérant dans le délai de la boutique, demande au propriétaire sinon (`/cancellations`).
+- **À relancer** (`/reminders`) : relance manuelle par WhatsApp, message prérempli.
+- **Réglages** (`/settings`) : délai d'annulation, arrondi, seuils, échéance, moyens de paiement.
+- Le journal est **immuable** (garanti par la base) ; seule `private.purge_tenant`, réservée au rôle `postgres`, peut effacer un propriétaire (tests, droit à l'effacement).
+
+Détails : [docs/decisions/0010](docs/decisions/0010-journal-client.md).
+
 ## Organisation
 
 ```

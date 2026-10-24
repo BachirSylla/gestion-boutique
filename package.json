@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "node -e \"for (const f of ['messages/fr-SN.d.json.ts', 'tsconfig.tsbuildinfo']) require('fs').rmSync(f, { force: true })\" && tsc --noEmit",
     "test": "vitest run --project domain",
     "test:watch": "vitest --project domain",
     "test:rls": "vitest run --project rls",

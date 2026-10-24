@@ -9,7 +9,8 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   timeout: 60_000,
-  expect: { timeout: 15_000 },
+  // Base distante (Londres) depuis le poste de développement : latences variables.
+  expect: { timeout: 25_000 },
   reporter: [["list"]],
   globalSetup: "./tests/e2e/global-setup.ts",
   globalTeardown: "./tests/e2e/global-teardown.ts",
@@ -18,6 +19,9 @@ export default defineConfig({
     locale: "fr-SN",
     timezoneId: "Africa/Dakar",
     trace: "retain-on-failure",
+    // Un blocage doit échouer vite plutôt qu'attendre la fin du test.
+    navigationTimeout: 45_000,
+    actionTimeout: 20_000,
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {

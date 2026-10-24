@@ -69,8 +69,8 @@ test.describe("propriétaire connecté", () => {
     const { owner } = readFixture();
     await login(page, `+221 ${owner.phoneInput}`, owner.password);
     await expect(page.getByRole("heading", { name: `Bonjour ${owner.fullName}` })).toBeVisible();
-    await expect(page.getByText("Vos 2 boutiques")).toBeVisible();
-    await expect(page.getByRole("main").getByText("Boutique Keur Fatou")).toBeVisible();
+    await expect(page.getByLabel("Changer de boutique").first()).toBeVisible();
+    await expect(page.getByRole("main").getByText(/Vous travaillez sur : Boutique (Fass|Keur Fatou)/)).toBeVisible();
 
     for (const { name, width, height } of WIDTHS) {
       await page.setViewportSize({ width, height });

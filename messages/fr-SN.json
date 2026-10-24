@@ -19,7 +19,10 @@
     "close": "Fermer",
     "edit": "Modifier",
     "none": "Aucune",
-    "phonePlaceholder": "77 123 45 67"
+    "phonePlaceholder": "77 123 45 67",
+    "search": "Rechercher",
+    "all": "Tous",
+    "noShopYet": "Aucune boutique : demandez au propriétaire de vous rattacher à une boutique."
   },
   "errors": {
     "forbidden": "Vous n'avez pas le droit de faire cette action.",
@@ -36,7 +39,19 @@
     "currentPasswordWrong": "Le mot de passe actuel est incorrect.",
     "notFound": "Élément introuvable.",
     "unexpected": "Une erreur est survenue. Réessayez.",
-    "offline": "Pas de réseau. Cette action demande une connexion."
+    "offline": "Pas de réseau. Cette action demande une connexion.",
+    "amountRequired": "Entrez un montant supérieur à 0.",
+    "lineInvalid": "Chaque ligne doit avoir un libellé, une quantité et un prix.",
+    "paymentMethodRequired": "Choisissez le moyen de paiement.",
+    "reasonRequired": "Le motif est obligatoire.",
+    "cancelNeedsRequest": "Le délai d'annulation libre est dépassé (ou ce n'est pas votre opération) : faites une demande au propriétaire.",
+    "alreadyCancelled": "Cette opération est déjà annulée.",
+    "customerArchived": "Ce client est archivé.",
+    "requestPending": "Une demande est déjà en attente pour cette opération.",
+    "noShop": "Aucune boutique sélectionnée.",
+    "typeRequired": "Choisissez le type de compte.",
+    "invalidAmount": "Montant invalide (nombre entier, sans virgule).",
+    "invalidDueDay": "Jour d'échéance entre 1 et 28 (ou vide pour la fin du mois)."
   },
   "auth": {
     "login": {
@@ -89,7 +104,12 @@
     "admin": "Propriétaires",
     "team": "Équipe",
     "shops": "Boutiques",
-    "account": "Mon compte"
+    "account": "Mon compte",
+    "customers": "Clients",
+    "reminders": "À relancer",
+    "menu": "Menu",
+    "cancellations": "Annulations",
+    "settings": "Réglages"
   },
   "shell": {
     "currentShop": "Boutique",
@@ -104,7 +124,15 @@
     "adminIntro": "Créez les comptes des propriétaires et leurs boutiques depuis la page Propriétaires.",
     "adminCta": "Voir les propriétaires",
     "ownerTeamCta": "Gérer mon équipe",
-    "comingSoon": "Les clients, les prises et le stock arrivent aux prochains jalons."
+    "owedTitle": "Vos clients vous doivent",
+    "owedCount": "{count, plural, =0 {Aucun client endetté} one {# client endetté} other {# clients endettés}}",
+    "advancesHeld": "Avances détenues : {amount}",
+    "newTake": "Nouvelle prise",
+    "newPayment": "Versement",
+    "remindersTitle": "À relancer",
+    "seeAll": "Tout voir",
+    "noReminder": "Personne à relancer aujourd'hui.",
+    "nextMilestones": "Le stock, les reçus et les bénéfices arrivent aux prochains jalons."
   },
   "credentials": {
     "title": "Identifiants à transmettre",
@@ -237,5 +265,190 @@
     "title": "Pas de réseau",
     "body": "Cette page n'est pas encore disponible hors ligne. Elle s'affichera dès que la connexion reviendra.",
     "retry": "Réessayer"
+  },
+  "money": {
+    "owes": "doit",
+    "advance": "avance",
+    "settled": "à jour"
+  },
+  "customers": {
+    "title": "Clients",
+    "new": "Nouveau client",
+    "searchPlaceholder": "Nom ou numéro",
+    "empty": "Aucun client pour l'instant.",
+    "noResult": "Aucun client ne correspond.",
+    "count": "{count, plural, =0 {Aucun client} one {# client} other {# clients}}",
+    "sort": {
+      "label": "Trier",
+      "recent": "Récents",
+      "debt": "Plus grosse dette",
+      "name": "Nom"
+    },
+    "types": {
+      "advance": "Avance",
+      "monthly": "Crédit mensuel",
+      "free": "Crédit libre"
+    },
+    "typeHints": {
+      "advance": "Verse une somme et prend jusqu'à épuisement.",
+      "monthly": "Prend au quotidien, paie à l'échéance.",
+      "free": "Prend et rembourse quand il peut."
+    },
+    "fields": {
+      "fullName": "Nom du client",
+      "phone": "Téléphone",
+      "phoneHint": "Recommandé pour envoyer les reçus et relances par WhatsApp.",
+      "type": "Type de compte",
+      "creditLimit": "Plafond de crédit",
+      "creditLimitHint": "Simple alerte : une prise au-delà reste possible.",
+      "alertThreshold": "Seuil d'alerte de l'avance",
+      "alertThresholdHint": "Vide : seuil de la boutique ({amount}).",
+      "monthlyDueDay": "Jour d'échéance",
+      "monthlyDueDayHint": "De 1 à 28. Vide : réglage de la boutique.",
+      "note": "Note"
+    },
+    "create": "Créer le client",
+    "save": "Enregistrer la fiche",
+    "edit": "Modifier la fiche",
+    "archive": "Archiver le client",
+    "archiveConfirm": "Le client disparaîtra des listes. Son historique est conservé. Confirmer ?",
+    "archiveConfirmBalance": "Attention : ce client a un solde de {amount}. Il disparaîtra des listes, son historique est conservé. Archiver quand même ?",
+    "unarchive": "Désarchiver",
+    "archived": "Archivé",
+    "archivedNotice": "Ce client est archivé : aucune nouvelle opération n'est possible.",
+    "balance": "Solde",
+    "limitUsed": "{used} sur un plafond de {limit}",
+    "overLimit": "Plafond dépassé de {amount}",
+    "dueDay": "Échéance : le {day, number} du mois",
+    "dueEndOfMonth": "Échéance : fin du mois",
+    "lastPayment": "Dernier versement : {date}",
+    "neverPaid": "Aucun versement",
+    "actions": {
+      "take": "Nouvelle prise",
+      "payment": "Versement",
+      "call": "Appeler",
+      "whatsapp": "WhatsApp"
+    },
+    "history": "Historique",
+    "noHistory": "Aucune opération pour l'instant."
+  },
+  "ledger": {
+    "kinds": {
+      "take": "Prise",
+      "payment": "Versement",
+      "cancellation": "Annulation"
+    },
+    "quickTake": "Rapide",
+    "detailedTake": "Détaillé",
+    "mode": "Mode de saisie",
+    "amount": "Montant",
+    "note": "Note",
+    "notePlaceholder": "riz + huile",
+    "newBalance": "Nouveau solde",
+    "currentBalance": "Solde actuel",
+    "saveTake": "Enregistrer la prise",
+    "savePayment": "Enregistrer le versement",
+    "saving": "Enregistrement…",
+    "paymentMethod": "Moyen de paiement",
+    "methods": {
+      "cash": "Espèces",
+      "wave": "Wave",
+      "orange_money": "Orange Money",
+      "other": "Autre"
+    },
+    "lines": {
+      "title": "Articles",
+      "label": "Article",
+      "quantity": "Quantité",
+      "unit": "Unité",
+      "unitPrice": "Prix unitaire",
+      "add": "Ajouter un article",
+      "remove": "Retirer l'article {index, number}",
+      "lineAmount": "Montant de la ligne",
+      "rounding": "Montants arrondis au pas de {step, number} F."
+    },
+    "units": {
+      "kg": "kg",
+      "l": "L",
+      "piece": "pièce",
+      "sachet": "sachet",
+      "other": "autre"
+    },
+    "lineSummary": "{quantity} {unit} × {price}",
+    "limitWarning": "Après cette prise, le plafond de {limit} sera dépassé de {excess}. La prise reste possible.",
+    "takeTitle": "Nouvelle prise",
+    "paymentTitle": "Versement",
+    "saved": {
+      "take": "Prise enregistrée.",
+      "payment": "Versement enregistré."
+    },
+    "undo": "Annuler",
+    "undone": "Opération annulée.",
+    "by": "par {name}",
+    "cancelled": "Annulée",
+    "cancellationOf": "Annulation : {kind} de {amount}",
+    "cancel": "Annuler l'opération",
+    "cancelConfirm": "Annuler cette opération ? Elle restera visible, barrée.",
+    "requestCancel": "Demander l'annulation",
+    "requestReason": "Motif de la demande",
+    "requestReasonPlaceholder": "Ex. : erreur de client, montant mal saisi",
+    "sendRequest": "Envoyer la demande",
+    "requestSent": "Demande envoyée au propriétaire.",
+    "pendingRequest": "Demande d'annulation en attente : {reason}",
+    "requestRejected": "Demande d'annulation refusée",
+    "pick": {
+      "takeTitle": "Nouvelle prise : quel client ?",
+      "paymentTitle": "Versement : quel client ?"
+    }
+  },
+  "reminders": {
+    "title": "À relancer",
+    "intro": "Les clients à relancer aujourd'hui. Vous envoyez vous-même le message, que vous pouvez modifier.",
+    "empty": "Personne à relancer aujourd'hui.",
+    "reasons": {
+      "overdue": "Échéance du {date} passée : {amount} échus",
+      "overLimit": "Plafond dépassé de {amount}",
+      "lowAdvance": "Avance sous le seuil de {threshold}",
+      "noRecentPayment": "Aucun versement depuis {days, number} jours"
+    },
+    "send": "Relancer par WhatsApp",
+    "noPhone": "Pas de numéro de téléphone",
+    "message": "Bonjour {name}, ici {shop}. Sauf erreur de notre part, votre compte présente un solde dû de {amount}. Merci de passer le régler dès que possible. Bonne journée !",
+    "messageAdvance": "Bonjour {name}, ici {shop}. Votre avance est presque épuisée : il reste {amount}. Vous pourrez la recharger à votre prochain passage. Merci !"
+  },
+  "cancellations": {
+    "title": "Demandes d'annulation",
+    "intro": "Les gérants demandent l'annulation d'une opération hors délai ou saisie par un autre.",
+    "empty": "Aucune demande en attente.",
+    "requestedBy": "Demandée par {name}, le {date}",
+    "operation": "{kind} de {amount} du {date}, saisie par {author}",
+    "approve": "Valider l'annulation",
+    "reject": "Refuser",
+    "approved": "Annulation validée.",
+    "rejected": "Demande refusée.",
+    "pendingCount": "{count, plural, one {# demande d'annulation en attente} other {# demandes d'annulation en attente}}"
+  },
+  "settings": {
+    "title": "Réglages de la boutique",
+    "intro": "Ces réglages s'appliquent à {shop}.",
+    "cancelWindow": "Délai d'annulation libre du gérant (minutes)",
+    "cancelWindowHint": "De 0 à 60. Au-delà, le gérant fait une demande au propriétaire.",
+    "roundingStep": "Arrondi des montants en quantité libre",
+    "roundingStepOption": "{step, number} F",
+    "advanceThreshold": "Seuil d'alerte d'avance par défaut",
+    "freeCreditDays": "Relancer un crédit libre sans versement depuis (jours)",
+    "monthlyDueDay": "Jour d'échéance des clients mensuels",
+    "monthlyDueDayHint": "De 1 à 28. Vide : fin du mois.",
+    "save": "Enregistrer les réglages",
+    "saved": "Réglages enregistrés.",
+    "paymentMethods": "Moyens de paiement",
+    "paymentMethodsHint": "Décochez un moyen pour ne plus le proposer. Il reste visible dans l'historique.",
+    "addMethod": "Ajouter",
+    "newMethodLabel": "Nouveau moyen de paiement",
+    "methodAdded": "Moyen ajouté.",
+    "saveMethods": "Enregistrer les moyens"
+  },
+  "menu": {
+    "title": "Menu"
   }
 }

@@ -9,7 +9,7 @@ const eslintConfig = defineConfig([
     files: ["src/**/*.{ts,tsx}"],
     rules: {
       // Invariant 8 : aucun texte d'interface en dur, tout passe par next-intl.
-      "react/jsx-no-literals": ["error", { noStrings: true, ignoreProps: true, allowedStrings: ["·", "—", "+", "−", "/", "←", "→"] }],
+      "react/jsx-no-literals": ["error", { noStrings: true, ignoreProps: true, allowedStrings: ["·", "—", "+", "−", "/", "←", "→", "F", "×", "=", "(", ")", ":"] }],
       // Un module n'expose que index.ts (utilisable partout) et server.ts (serveur uniquement).
       "no-restricted-imports": [
         "error",

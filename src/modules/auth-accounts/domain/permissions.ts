@@ -7,13 +7,18 @@ export type Capability =
   | "managePlatform" // propriétaires et leurs boutiques
   | "manageTeam" // gérants et comptables
   | "manageShops" // créer, modifier ses boutiques
-  | "workInShop"; // saisies du quotidien dans une boutique
+  | "workInShop" // travailler dans une boutique (lecture au moins)
+  | "viewCustomers" // consulter clients, soldes, historique
+  | "manageCustomers" // créer, modifier, archiver un client
+  | "recordOperations" // prises, versements, annulations, demandes
+  | "decideCancellations" // valider / refuser une demande d'annulation
+  | "manageSettings"; // réglages de la boutique
 
 const CAPABILITIES: Record<AccountRole, readonly Capability[]> = {
   platformAdmin: ["managePlatform"],
-  owner: ["manageTeam", "manageShops", "workInShop"],
-  manager: ["workInShop"],
-  accountant: ["workInShop"],
+  owner: ["manageTeam", "manageShops", "workInShop", "viewCustomers", "manageCustomers", "recordOperations", "decideCancellations", "manageSettings"],
+  manager: ["workInShop", "viewCustomers", "manageCustomers", "recordOperations"],
+  accountant: ["workInShop", "viewCustomers"],
 };
 
 export function can(role: AccountRole | null, capability: Capability): boolean {

@@ -22,6 +22,19 @@ describe("can (matrice CLAUDE.md §4.2, jalon 2)", () => {
     }
   });
 
+  it("clients et journal (jalon 3) : le comptable lit seulement, le propriétaire décide et règle", () => {
+    expect(can("manager", "recordOperations")).toBe(true);
+    expect(can("manager", "manageCustomers")).toBe(true);
+    expect(can("manager", "decideCancellations")).toBe(false);
+    expect(can("manager", "manageSettings")).toBe(false);
+    expect(can("accountant", "viewCustomers")).toBe(true);
+    expect(can("accountant", "recordOperations")).toBe(false);
+    expect(can("accountant", "manageCustomers")).toBe(false);
+    expect(can("owner", "decideCancellations")).toBe(true);
+    expect(can("owner", "manageSettings")).toBe(true);
+    expect(can("platformAdmin", "viewCustomers")).toBe(false);
+  });
+
   it("sans rôle, aucune capacité", () => {
     expect(can(null, "workInShop")).toBe(false);
   });

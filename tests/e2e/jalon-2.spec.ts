@@ -118,7 +118,7 @@ test("comptes : de la création du propriétaire à la suspension", async ({ bro
   await login(manager.page, managerPhone.phoneInput, managerTempPassword);
   await choosePassword(manager.page, "Moussa-motdepasse-1");
   await expect(manager.page.getByText("Vous travaillez sur : Boutique Awa")).toBeVisible();
-  await expect(manager.page.getByText("Votre boutique")).toBeVisible();
+  await expect(manager.page.getByLabel("Changer de boutique")).toHaveCount(0); // une seule boutique
   await expect(manager.page.getByRole("link", { name: "Équipe" })).toHaveCount(0);
   await manager.page.goto("/team");
   await expect(manager.page).toHaveURL(/\/$/);
@@ -140,7 +140,7 @@ test("comptes : de la création du propriétaire à la suspension", async ({ bro
   await expect(owner.page.getByText("Boutiques enregistrées.")).toBeVisible();
   await shoot(owner.page, "fiche-employe");
   await manager.page.goto("/");
-  await expect(manager.page.getByText("Vos 2 boutiques")).toBeVisible();
+  await expect(manager.page.getByLabel("Changer de boutique").first()).toBeVisible();
 
   // 6. Le propriétaire désactive le gérant : il est déconnecté avec un message.
   await owner.page.getByRole("button", { name: "Désactiver le compte" }).click();

@@ -15,6 +15,18 @@ export type ActionErrorCode =
   | "passwordUnchanged"
   | "currentPasswordWrong"
   | "notFound"
+  | "amountRequired"
+  | "lineInvalid"
+  | "paymentMethodRequired"
+  | "reasonRequired"
+  | "cancelNeedsRequest"
+  | "alreadyCancelled"
+  | "customerArchived"
+  | "requestPending"
+  | "noShop"
+  | "typeRequired"
+  | "invalidAmount"
+  | "invalidDueDay"
   | "unexpected";
 
 export type ActionState<T = null> =
@@ -44,6 +56,17 @@ export function errorFromDatabase(error: { code?: string; message?: string }): A
       return "invalidInput";
     case "P0002":
       return "notFound";
+    // Codes métier du journal (migration 20261024050000).
+    case "BT001":
+      return "cancelNeedsRequest";
+    case "BT002":
+      return "alreadyCancelled";
+    case "BT003":
+      return "customerArchived";
+    case "BT004":
+      return "invalidInput";
+    case "BT006":
+      return "requestPending";
   }
   return "unexpected";
 }

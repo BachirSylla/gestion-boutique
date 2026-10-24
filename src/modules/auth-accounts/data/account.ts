@@ -12,6 +12,8 @@ export interface ShopSummary {
   district: string | null;
   city: string | null;
   phone_e164: string | null;
+  timezone: string;
+  currency: string;
 }
 
 export interface CurrentAccount {
@@ -40,7 +42,7 @@ export const getCurrentAccount = cache(async (): Promise<CurrentAccount | null> 
   const [adminResult, profileResult, shopsResult] = await Promise.all([
     supabase.from("platform_admins").select("full_name").eq("user_id", userId).maybeSingle(),
     supabase.from("profiles").select("role, full_name, status, must_change_password, tenant_id").eq("user_id", userId).maybeSingle(),
-    supabase.from("shops").select("id, name, district, city, phone_e164").is("archived_at", null).order("name"),
+    supabase.from("shops").select("id, name, district, city, phone_e164, timezone, currency").is("archived_at", null).order("name"),
   ]);
   for (const result of [adminResult, profileResult, shopsResult]) {
     if (result.error) throw new Error(`Lecture du compte impossible : ${result.error.message}`);

@@ -5,7 +5,9 @@ import { requirePageAccount, signOutAction } from "@/modules/auth-accounts/serve
 import { ShopSwitcher } from "@/modules/shops";
 import { getCurrentShop, setCurrentShopAction } from "@/modules/shops/server";
 import { Button, LogoMark } from "@/shared/ui";
-import { NavLinks, type NavItem } from "./_shell/NavLinks";
+import { countPendingRequests } from "@/modules/customers/server";
+import { navigation } from "./_shell/nav";
+import { NavLinks } from "./_shell/NavLinks";
 
 /**
  * Coquille de l'application connectée : menu latéral sur ordinateur, barre du bas sur téléphone.
@@ -17,13 +19,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const t = await getTranslations();
   const currentShop = await getCurrentShop(account);
-  const items: NavItem[] = [
-    { href: "/", label: t("nav.home"), icon: "home" },
-    ...(can(account.role, "managePlatform") ? [{ href: "/admin", label: t("nav.admin"), icon: "admin" } as const] : []),
-    ...(can(account.role, "manageTeam") ? [{ href: "/team", label: t("nav.team"), icon: "team" } as const] : []),
-    ...(can(account.role, "manageShops") ? [{ href: "/shops", label: t("nav.shops"), icon: "shops" } as const] : []),
-    { href: "/account", label: t("nav.account"), icon: "account" },
-  ];
+  const pending = currentShop && can(account.role, "decideCancellations") ? await countPendingRequests(currentShop.id) : 0;
+  const nav = await navigation(account, pending);
   const roleLabel = account.role ? t(`accounts.roles.${account.role}`) : "";
 
   return (
@@ -45,7 +42,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         ) : null}
         <div className="flex-1">
-          <NavLinks items={items} variant="side" label={t("nav.label")} />
+          <NavLinks items={nav.all} variant="side" label={t("nav.label")} />
         </div>
         <div className="border-t border-white/15 px-2 pt-4">
           <p className="truncate font-bold">{account.fullName}</p>
@@ -73,7 +70,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </header>
 
       <main className="mx-auto max-w-5xl px-4 pt-6 pb-28 sm:px-6 lg:px-10 lg:py-10">{children}</main>
-      <NavLinks items={items} variant="bottom" label={t("nav.label")} />
+      <NavLinks items={nav.bottom} variant="bottom" label={t("nav.label")} />
     </div>
   );
 }

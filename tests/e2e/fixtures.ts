@@ -4,7 +4,8 @@ import { randomBytes, randomInt } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 import { loginEmailFromPhone } from "../../src/shared/domain/phone";
-import { requireEnv } from "../../scripts/lib/env";
+import pg from "pg";
+import { databaseUrl, requireEnv } from "../../scripts/lib/env";
 
 export const E2E_TENANT_PREFIX = "[e2e] ";
 const FIXTURE_FILE = "test-results/e2e-fixture.json";
@@ -23,6 +24,7 @@ export interface E2eFixture {
   shopIds: string[];
   owner: E2eUser;
   disabledManager: E2eUser;
+  manager: E2eUser;
   platformAdmin: E2eUser;
 }
 
@@ -92,10 +94,19 @@ export async function createFixture(): Promise<E2eFixture> {
   );
   checkOk(await db.from("shop_members").insert({ shop_id: shops[0]!.id, user_id: disabledManager.id, tenant_id: tenantId }));
 
+  const manager = await createUser("Ousmane Sarr");
+  checkOk(
+    await db
+      .from("profiles")
+      .insert({ user_id: manager.id, tenant_id: tenantId, role: "manager", full_name: manager.fullName, status: "active", must_change_password: false }),
+  );
+  checkOk(await db.from("profile_contacts").insert({ user_id: manager.id, tenant_id: tenantId, phone_e164: manager.phone }));
+  checkOk(await db.from("shop_members").insert({ shop_id: shops[0]!.id, user_id: manager.id, tenant_id: tenantId }));
+
   const platformAdmin = await createUser("Admin Bitig");
   checkOk(await db.from("platform_admins").insert({ user_id: platformAdmin.id, full_name: platformAdmin.fullName, phone_e164: platformAdmin.phone }));
 
-  const fixture = { tenantId, shopIds: shops.map((s) => s.id), owner, disabledManager, platformAdmin };
+  const fixture = { tenantId, shopIds: shops.map((s) => s.id), owner, disabledManager, manager, platformAdmin };
   mkdirSync("test-results", { recursive: true });
   writeFileSync(FIXTURE_FILE, JSON.stringify(fixture));
   return fixture;
@@ -105,22 +116,26 @@ export function readFixture(): E2eFixture {
   return JSON.parse(readFileSync(FIXTURE_FILE, "utf8")) as E2eFixture;
 }
 
-/** Supprime toutes les données créées par les tests e2e (propriétaires préfixés « [e2e] »). */
+/**
+ * Supprime toutes les données créées par les tests e2e (propriétaires préfixés « [e2e] »).
+ * Le journal client est immuable : seule la purge private.purge_tenant (rôle postgres, connexion
+ * directe à la base) peut le supprimer.
+ */
 export async function cleanupFixtures(): Promise<void> {
   const db = admin();
-  const tenants = check(await db.from("tenants").select("id").like("name", `${E2E_TENANT_PREFIX}%`));
-  for (const { id: tenantId } of tenants) {
-    const profiles = check(await db.from("profiles").select("user_id").eq("tenant_id", tenantId));
-    checkOk(await db.from("account_events").delete().eq("tenant_id", tenantId));
-    checkOk(await db.from("shop_members").delete().eq("tenant_id", tenantId));
-    checkOk(await db.from("profile_contacts").delete().eq("tenant_id", tenantId));
-    checkOk(await db.from("profiles").delete().eq("tenant_id", tenantId));
-    checkOk(await db.from("shops").delete().eq("tenant_id", tenantId));
-    checkOk(await db.from("tenants").delete().eq("id", tenantId));
-    for (const { user_id } of profiles) {
+  const pgClient = new pg.Client({ connectionString: databaseUrl(), ssl: { rejectUnauthorized: false } });
+  await pgClient.connect();
+  try {
+    const { rows } = await pgClient.query<{ user_id: string }>(
+      "select private.purge_tenant(t.id) as user_id from public.tenants t where t.name like $1",
+      [`${E2E_TENANT_PREFIX}%`],
+    );
+    for (const { user_id } of rows) {
       const { error } = await db.auth.admin.deleteUser(user_id);
       if (error) throw error;
     }
+  } finally {
+    await pgClient.end();
   }
   // Comptes Auth de test restés sans profil (exécution interrompue).
   const { data, error } = await db.auth.admin.listUsers({ perPage: 1000 });

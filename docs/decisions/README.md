@@ -14,3 +14,4 @@ On peut changer d'avis : on écrit alors une nouvelle note qui remplace l'ancien
 | [0007](0007-i18n.md) | Internationalisation (next-intl) | Acceptée |
 | [0008](0008-migrations-distantes.md) | Migrations appliquées au projet distant sans Docker | Acceptée |
 | [0009](0009-administration-des-comptes.md) | Administration des comptes : fonctions serveur, mots de passe provisoires, désactivation, journal | Acceptée |
+| [0010](0010-journal-client.md) | Clients et journal client : immuabilité, écritures idempotentes, annulations, relances | Acceptée |
