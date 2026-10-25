@@ -39,6 +39,11 @@ async function expectBalance(page: Page, amount: string, label: "doit" | "avance
   await expect(card).toContainText(label);
 }
 
+/** Attend que les saisies de l'appareil soient envoyées (indicateur « Synchronisé »). */
+async function waitSynced(page: Page) {
+  await expect(page.getByTestId("sync-indicator").first()).toHaveAttribute("data-state", "synced");
+}
+
 test.describe.configure({ mode: "serial" });
 
 test("clients et journal : prises, versements, plafond, annulations", async ({ browser }) => {
@@ -114,7 +119,7 @@ test("clients et journal : prises, versements, plafond, annulations", async ({ b
   await page.getByRole("status").filter({ hasText: "Prise enregistrée." }).getByRole("button", { name: /^Annuler/ }).click();
   await expect(page.getByText("Opération annulée.")).toBeVisible();
   // Navigation explicite (le bandeau retire lui-même « ?saved » de l'adresse au bout de 10 s).
-  await page.goto(page.url().split("?")[0]!);
+  await page.reload();
   await expectBalance(page, "−9 310 F", "doit");
   await expect(page.getByText("Annulée").first()).toBeVisible();
 
@@ -127,7 +132,8 @@ test("clients et journal : prises, versements, plafond, annulations", async ({ b
   await expect(page.getByText(`Plafond dépassé de 4${NBSP}310${NBSP}F`).first()).toBeVisible();
   await shoot(page, "fiche-client");
 
-  // 7. « À relancer » : plafond dépassé, message WhatsApp prérempli.
+  // 7. « À relancer » (calculé par le serveur) : plafond dépassé, message WhatsApp prérempli.
+  await waitSynced(page);
   await page.getByRole("link", { name: "À relancer" }).first().click();
   await expect(page.getByText(`Plafond dépassé de 4${NBSP}310${NBSP}F`)).toBeVisible();
   const whatsapp = page.getByRole("link", { name: "Relancer par WhatsApp" });
@@ -142,7 +148,7 @@ test("clients et journal : prises, versements, plafond, annulations", async ({ b
   await m.page.getByLabel("Montant").fill("500");
   await m.page.getByRole("button", { name: /Enregistrer la prise/ }).click();
   await expectBalance(m.page, "−29 810 F", "doit");
-  await m.page.goto(m.page.url().split("?")[0]!);
+  await m.page.reload();
   const own = m.page.locator("li").filter({ hasText: `−500${NBSP}F` }).filter({ hasText: "par Ousmane Sarr" });
   await own.getByRole("button", { name: "Annuler l'opération" }).click();
   await expectBalance(m.page, "−29 310 F", "doit");
@@ -152,6 +158,7 @@ test("clients et journal : prises, versements, plafond, annulations", async ({ b
   await ownersTake.getByLabel("Motif de la demande").fill("Le client conteste cette prise");
   await ownersTake.getByRole("button", { name: "Envoyer la demande" }).click();
   await expect(m.page.getByText("Demande envoyée au propriétaire.")).toBeVisible();
+  await waitSynced(m.page);
   await expect(m.page.getByRole("link", { name: "Réglages" })).toHaveCount(0);
 
   // 9. Le propriétaire valide la demande.

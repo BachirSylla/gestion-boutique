@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { amountOwed, type ReminderReason } from "@/modules/customers";
+import { amountOwed, customerHref, type ReminderReason } from "@/modules/customers";
 import type { CustomerRow } from "@/modules/customers/server";
 import { formatAmount, whatsAppLink } from "@/shared/domain";
 import { Balance } from "@/shared/ui";
@@ -28,7 +28,7 @@ export async function ReminderCard({ customer, reasons, shopName, compact = fals
 
   return (
     <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center">
-      <Link href={`/customers/${customer.id}`} className="min-w-0 flex-1">
+      <Link href={customerHref(customer.id)} className="min-w-0 flex-1">
         <span className="block font-bold text-encre">{customer.fullName}</span>
         <ul className="text-sm text-gris-texte">
           {reasons.map((reason) => (

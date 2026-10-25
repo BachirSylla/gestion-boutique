@@ -9,10 +9,18 @@ export function PageHeader({ title, intro, action, back }: { title: string; intr
   return (
     <header className="mb-6">
       {back ? (
-        <Link href={back.href} className="mb-3 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-vert-fonce hover:underline">
-          <span aria-hidden="true">←</span>
-          {back.label}
-        </Link>
+        // Ancre interne (#…) : lien simple, utilisable hors ligne ; sinon lien du routeur.
+        back.href.startsWith("#") ? (
+          <a href={back.href} className="mb-3 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-vert-fonce hover:underline">
+            <span aria-hidden="true">←</span>
+            {back.label}
+          </a>
+        ) : (
+          <Link href={back.href} className="mb-3 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-vert-fonce hover:underline">
+            <span aria-hidden="true">←</span>
+            {back.label}
+          </Link>
+        )
       ) : null}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">

@@ -4,7 +4,8 @@ import { can } from "@/modules/auth-accounts";
 import { requirePageAccount, signOutAction } from "@/modules/auth-accounts/server";
 import { countPendingRequests } from "@/modules/customers/server";
 import { getCurrentShop } from "@/modules/shops/server";
-import { Badge, Button, PageHeader } from "@/shared/ui";
+import { SignOutButton } from "@/modules/sync";
+import { Badge, PageHeader } from "@/shared/ui";
 import { navigation } from "../_shell/nav";
 
 /** Menu du téléphone : tout ce qui n'est pas dans la barre du bas. */
@@ -29,11 +30,9 @@ export default async function MenuPage() {
           </li>
         ))}
       </ul>
-      <form action={signOutAction} className="mt-6">
-        <Button type="submit" variant="ghost" block>
-          {t("auth.signOut")}
-        </Button>
-      </form>
+      <div className="mt-6">
+        <SignOutButton action={signOutAction} userId={account.userId} />
+      </div>
     </div>
   );
 }

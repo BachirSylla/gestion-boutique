@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { formatPhone, type Amount } from "@/shared/domain";
@@ -14,17 +13,27 @@ export interface CustomerListItem {
   type: CustomerType;
   balance: Amount;
   lastOperationAt: string | null;
+  /** Créé ou modifié sur l'appareil, pas encore envoyé. */
+  pending?: boolean;
 }
 
 type Sort = "recent" | "debt" | "name";
 
 /**
  * Liste des clients : recherche dès la première lettre (nom ou numéro), filtre par type,
- * tri (récents en tête par défaut). `hrefSuffix` permet de s'en servir comme sélecteur
- * (« /take » : aller directement à la prise).
+ * tri (récents en tête par défaut). `hrefFor` choisit la destination (fiche, prise, versement).
  */
-export function CustomerList({ customers, hrefSuffix = "", autoFocus = false }: { customers: CustomerListItem[]; hrefSuffix?: string; autoFocus?: boolean }) {
+export function CustomerList({
+  customers,
+  hrefFor,
+  autoFocus = false,
+}: {
+  customers: CustomerListItem[];
+  hrefFor: (id: string) => string;
+  autoFocus?: boolean;
+}) {
   const t = useTranslations("customers");
+  const ts = useTranslations("sync");
   const tc = useTranslations("common");
   const [query, setQuery] = useState("");
   const [type, setType] = useState<CustomerType | "all">("all");
@@ -93,7 +102,7 @@ export function CustomerList({ customers, hrefSuffix = "", autoFocus = false }: 
         <ul className="flex flex-col divide-y divide-bordure overflow-hidden rounded-carte border border-bordure bg-surface">
           {visible.map((customer) => (
             <li key={customer.id}>
-              <Link href={`/customers/${customer.id}${hrefSuffix}`} className="flex min-h-16 items-center gap-3 px-4 py-3 hover:bg-fond">
+              <a href={hrefFor(customer.id)} className="flex min-h-16 items-center gap-3 px-4 py-3 hover:bg-fond">
                 <span
                   aria-hidden="true"
                   className={`flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-extrabold ${
@@ -103,14 +112,17 @@ export function CustomerList({ customers, hrefSuffix = "", autoFocus = false }: 
                   {initials(customer.fullName)}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate font-bold text-encre">{customer.fullName}</span>
+                  <span className="block truncate font-bold text-encre">
+                    {customer.fullName}
+                    {customer.pending ? <span className="ml-2 align-middle text-xs font-semibold text-safran">{ts("pendingShort")}</span> : null}
+                  </span>
                   <span className="block truncate text-sm text-gris-texte">
                     {t(`types.${customer.type}`)}
                     {customer.phone ? <span className="montant"> · {formatPhone(customer.phone)}</span> : null}
                   </span>
                 </span>
                 <Balance value={customer.balance} size="sm" />
-              </Link>
+              </a>
             </li>
           ))}
         </ul>

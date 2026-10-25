@@ -1,3 +1,3 @@
-export { TakeForm } from "./TakeForm";
-export { PaymentForm, type PaymentMethodOption } from "./PaymentForm";
+export { TakeForm, type TakeDraft } from "./TakeForm";
+export { PaymentForm, type PaymentDraft, type PaymentMethodOption } from "./PaymentForm";
 export { OperationActions, SavedBanner } from "./OperationActions";

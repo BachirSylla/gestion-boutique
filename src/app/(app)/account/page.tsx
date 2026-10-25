@@ -1,7 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { PasswordForm } from "@/modules/auth-accounts";
 import { changePasswordAction, requirePageAccount, signOutAction } from "@/modules/auth-accounts/server";
-import { Button, Card, PageHeader } from "@/shared/ui";
+import { SignOutButton } from "@/modules/sync";
+import { Card, PageHeader } from "@/shared/ui";
 
 export default async function AccountPage() {
   const account = await requirePageAccount();
@@ -23,11 +24,9 @@ export default async function AccountPage() {
           <h2 className="mb-4 text-lg font-bold text-encre">{t("account.changePassword")}</h2>
           <PasswordForm action={changePasswordAction} mode="change" />
         </Card>
-        <form action={signOutAction}>
-          <Button type="submit" variant="ghost" block>
-            {t("auth.signOut")}
-          </Button>
-        </form>
+      <div>
+        <SignOutButton action={signOutAction} userId={account.userId} />
+      </div>
       </div>
     </div>
   );

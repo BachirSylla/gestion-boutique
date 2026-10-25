@@ -60,6 +60,15 @@ Détails : [docs/decisions/0009](docs/decisions/0009-administration-des-comptes.
 
 Détails : [docs/decisions/0010](docs/decisions/0010-journal-client.md).
 
+## Hors ligne (jalon 4)
+
+- Les clients, fiches, prises, versements et nouveaux clients se saisissent **sans réseau** : tout est écrit sur l'appareil puis envoyé dès que le réseau revient, sans doublon.
+- L'indicateur (en-tête ou menu latéral) montre : synchronisé, envois en attente, hors ligne, saisies refusées. La page `/sync` détaille l'état et les refus.
+- La première connexion sur un appareil demande le réseau (téléchargement des données de la boutique).
+- La déconnexion efface les données de l'appareil.
+
+Détails : [docs/decisions/0011](docs/decisions/0011-synchronisation-hors-ligne.md).
+
 ## Organisation
 
 ```

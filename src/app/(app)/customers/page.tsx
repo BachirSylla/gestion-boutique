@@ -1,19 +1,21 @@
-import { getTranslations } from "next-intl/server";
 import { can } from "@/modules/auth-accounts";
-import { CustomerList } from "@/modules/customers";
-import { listCustomers } from "@/modules/customers/server";
-import { LinkButton, PageHeader } from "@/shared/ui";
+import { CustomersApp } from "@/modules/customers";
 import { NoShop, requireShopPage } from "../_shell/shop";
 
+/**
+ * Clients, fiches, prises et versements : écran lu sur l'appareil (fonctionne sans réseau).
+ * Le serveur ne fournit que l'identité et la boutique ; les données viennent de la base locale.
+ */
 export default async function CustomersPage() {
   const { account, shop } = await requireShopPage("viewCustomers");
-  const t = await getTranslations("customers");
   if (!shop) return <NoShop />;
-  const customers = await listCustomers(shop.id);
   return (
-    <>
-      <PageHeader title={t("title")} action={can(account.role, "manageCustomers") ? <LinkButton href="/customers/new" variant="secondary">{t("new")}</LinkButton> : null} />
-      <CustomerList customers={customers} />
-    </>
+    <CustomersApp
+      userId={account.userId}
+      role={account.role}
+      shop={{ id: shop.id, name: shop.name, timezone: shop.timezone }}
+      canRecord={can(account.role, "recordOperations")}
+      canManage={can(account.role, "manageCustomers")}
+    />
   );
 }

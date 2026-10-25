@@ -14,3 +14,6 @@ export {
 } from "./domain/customers";
 export { CustomerList, type CustomerListItem } from "./ui/CustomerList";
 export { CustomerForm, type CustomerFormValues } from "./ui/CustomerForm";
+export { CustomersApp, type CustomersAppProps } from "./ui/CustomersApp";
+export { customerHref } from "./domain/routes";
+export { HomeSummary } from "./ui/HomeSummary";

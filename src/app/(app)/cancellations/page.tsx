@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
+import { customerHref } from "@/modules/customers";
 import { listPendingRequests } from "@/modules/customers/server";
 import { decideCancellationAction } from "@/modules/ledger/server";
 import { formatAmount } from "@/shared/domain";
@@ -33,7 +34,7 @@ export default async function CancellationsPage({ searchParams }: { searchParams
           {requests.map((request) => (
             <li key={request.id}>
               <Card>
-                <Link href={`/customers/${request.customer.id}`} className="text-lg font-bold text-encre hover:underline">
+                <Link href={customerHref(request.customer.id)} className="text-lg font-bold text-encre hover:underline">
                   {request.customer.fullName}
                 </Link>
                 <p className="mt-1 text-encre">

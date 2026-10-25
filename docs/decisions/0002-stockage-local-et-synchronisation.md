@@ -1,6 +1,6 @@
 # 0002 — Stockage local et synchronisation
 
-**Date** : 24 oct. 2026 · **Statut** : acceptée (mise en œuvre au jalon 4)
+**Date** : 24 oct. 2026 · **Statut** : acceptée, mise en œuvre au jalon 4 (voir [0011](0011-synchronisation-hors-ligne.md))
 
 ## Contexte
 Invariant 5 : les saisies du quotidien fonctionnent sans réseau et se synchronisent sans doublon ni perte. Les appareils sont des Android d'entrée de gamme, la donnée mobile est chère.

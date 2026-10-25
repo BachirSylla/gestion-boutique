@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { authorizeAction } from "@/modules/auth-accounts/server";
 import { getCurrentShop } from "@/modules/shops/server";
@@ -38,8 +37,7 @@ export async function saveCustomerAction(_previous: ActionState, form: FormData)
     const { data, error } = await supabase.from("customers").update(row).eq("id", existingId).select("id");
     if (error) return failure(errorFromDatabase(error));
     if (!data?.length) return failure("forbidden");
-    revalidatePath(`/customers/${existingId}`);
-    redirect(`/customers/${existingId}`);
+    redirect(`/customers#/c/${existingId}`);
   }
 
   const newId = uuid(form, "newCustomerId");
@@ -48,8 +46,7 @@ export async function saveCustomerAction(_previous: ActionState, form: FormData)
   const { error } = await supabase.from("customers").insert({ id: newId, shop_id: shop.id, ...row });
   // Double envoi du même formulaire : la fiche existe déjà, on y va.
   if (error && error.code !== "23505") return failure(errorFromDatabase(error));
-  revalidatePath("/customers");
-  redirect(`/customers/${newId}`);
+  redirect(`/customers#/c/${newId}`);
 }
 
 /** Archivage (le client disparaît des listes ; son historique reste) ou désarchivage. */
@@ -67,7 +64,5 @@ export async function setCustomerArchivedAction(_previous: ActionState, form: Fo
     .select("id");
   if (error) return failure(errorFromDatabase(error));
   if (!data?.length) return failure("forbidden");
-  revalidatePath("/customers");
-  revalidatePath(`/customers/${customerId}`);
-  redirect(archived ? "/customers" : `/customers/${customerId}`);
+  redirect(archived ? "/customers" : `/customers#/c/${customerId}`);
 }

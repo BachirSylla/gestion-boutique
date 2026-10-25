@@ -109,7 +109,8 @@
     "reminders": "À relancer",
     "menu": "Menu",
     "cancellations": "Annulations",
-    "settings": "Réglages"
+    "settings": "Réglages",
+    "sync": "Synchronisation"
   },
   "shell": {
     "currentShop": "Boutique",
@@ -399,7 +400,8 @@
     "pick": {
       "takeTitle": "Nouvelle prise : quel client ?",
       "paymentTitle": "Versement : quel client ?"
-    }
+    },
+    "pendingRequestShort": "Demande d'annulation en attente"
   },
   "reminders": {
     "title": "À relancer",
@@ -450,5 +452,35 @@
   },
   "menu": {
     "title": "Menu"
+  },
+  "sync": {
+    "title": "Synchronisation",
+    "synced": "Synchronisé",
+    "pending": "{count, plural, =0 {Aucun envoi en attente} one {# envoi en attente} other {# envois en attente}}",
+    "offline": "Hors ligne",
+    "offlinePending": "{count, plural, one {Hors ligne · # en attente} other {Hors ligne · # en attente}}",
+    "rejected": "{count, plural, one {# saisie refusée} other {# saisies refusées}}",
+    "lastSync": "à {time}",
+    "lastSyncFull": "Dernière synchronisation : {date}",
+    "neverSynced": "Jamais synchronisé sur cet appareil.",
+    "states": {
+      "synced": "Tout est synchronisé.",
+      "pending": "Des saisies attendent d'être envoyées.",
+      "offline": "Hors ligne : vos saisies sont gardées sur cet appareil.",
+      "rejected": "Des saisies ont été refusées par le serveur."
+    },
+    "explanation": "Vos saisies sont d'abord enregistrées sur cet appareil, puis envoyées dès que le réseau est disponible. Un renvoi ne crée jamais de doublon.",
+    "syncNow": "Synchroniser maintenant",
+    "syncing": "Synchronisation…",
+    "rejectedTitle": "Saisies refusées",
+    "rejectedIntro": "Le serveur a refusé ces saisies : elles ne comptent pas dans les soldes. Lisez le motif, ressaisissez si besoin, puis retirez-les.",
+    "noRejected": "Aucune saisie refusée.",
+    "dismiss": "J'ai compris, retirer",
+    "rejectedBadge": "Refusée : {reason}",
+    "pendingShort": "En attente d'envoi",
+    "loading": "Chargement des données de l'appareil…",
+    "firstSyncNeeded": "Première utilisation sur cet appareil : connectez-vous au réseau le temps de télécharger les données de la boutique.",
+    "lateCancellationReason": "Annulation saisie hors ligne, arrivée après le délai d'annulation libre.",
+    "signOutPending": "{count, plural, one {# saisie n'a pas encore été envoyée et sera perdue.} other {# saisies n'ont pas encore été envoyées et seront perdues.}} Se déconnecter quand même ?"
   }
 }

@@ -1,11 +1,18 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useActionState, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { formatAmount, parseQuantity, type RoundingStep } from "@/shared/domain";
-import type { ActionState } from "@/shared/server/action-state";
-import { AmountInput, Balance, Notice, SubmitButton, TextField } from "@/shared/ui";
-import { SALE_UNITS, balanceAfter, buildDetailedTake, type SaleUnit } from "../domain/operations";
+import { AmountInput, Balance, Button, Notice, TextField } from "@/shared/ui";
+import { SALE_UNITS, balanceAfter, buildDetailedTake, type SaleUnit, type TakeLine } from "../domain/operations";
+
+export interface TakeDraft {
+  id: string;
+  mode: "quick" | "detailed";
+  amount: number;
+  note: string | null;
+  lines: TakeLine[];
+}
 
 interface LineDraft {
   key: string;
@@ -20,16 +27,15 @@ const emptyLine = (): LineDraft => ({ key: crypto.randomUUID(), label: "", quant
 /**
  * Nouvelle prise : mode rapide (montant + note, < 10 s) ou détaillé (articles × quantité × prix figé).
  * Le nouveau solde et l'alerte de plafond s'affichent en direct ; le plafond n'est jamais bloquant.
+ * La saisie est écrite sur l'appareil (onSave) : elle fonctionne sans réseau.
  */
 export function TakeForm({
-  action,
-  customerId,
+  onSave,
   balance,
   creditLimit,
   roundingStep,
 }: {
-  action: (previous: ActionState, form: FormData) => Promise<ActionState>;
-  customerId: string;
+  onSave: (draft: TakeDraft) => void;
   balance: number;
   creditLimit: number | null;
   roundingStep: RoundingStep;
@@ -37,8 +43,10 @@ export function TakeForm({
   const t = useTranslations("ledger");
   const te = useTranslations("errors");
   const tc = useTranslations("common");
-  const [state, formAction] = useActionState(action, { status: "idle" });
   const [operationId] = useState(() => crypto.randomUUID());
+  const [note, setNote] = useState("");
+  const [error, setError] = useState<"amountRequired" | "lineInvalid" | null>(null);
+  const [saving, setSaving] = useState(false);
   const [mode, setMode] = useState<"quick" | "detailed">("quick");
   const [quickAmount, setQuickAmount] = useState<number | null>(null);
   const [lines, setLines] = useState<LineDraft[]>([emptyLine()]);
@@ -59,30 +67,20 @@ export function TakeForm({
   const total = mode === "quick" ? (quickAmount ?? 0) : detailed.ok ? detailed.total : 0;
   const newBalance = balanceAfter(balance, "take", total);
   const excess = creditLimit && -newBalance > creditLimit ? -newBalance - creditLimit : 0;
-  const field = (name: string) => {
-    const code = state.status === "error" ? state.fields?.[name] : undefined;
-    return code ? te(code) : null;
-  };
   const update = (key: string, patch: Partial<LineDraft>) => setLines((current) => current.map((l) => (l.key === key ? { ...l, ...patch } : l)));
 
   return (
     <form
-      action={formAction}
       onSubmit={(event) => {
-        const deviceTime = event.currentTarget.elements.namedItem("deviceCreatedAt") as HTMLInputElement;
-        deviceTime.value = new Date().toISOString();
+        event.preventDefault();
+        if (saving) return;
+        if (mode === "quick" && total <= 0) return setError("amountRequired");
+        if (mode === "detailed" && !detailed.ok) return setError("lineInvalid");
+        setSaving(true);
+        onSave({ id: operationId, mode, amount: total, note: note.trim() || null, lines: mode === "detailed" && detailed.ok ? detailed.lines : [] });
       }}
       className="flex flex-col gap-5 pb-40"
     >
-      <input type="hidden" name="operationId" value={operationId} />
-      <input type="hidden" name="customerId" value={customerId} />
-      <input type="hidden" name="mode" value={mode} />
-      <input type="hidden" name="deviceCreatedAt" defaultValue="" />
-      <input
-        type="hidden"
-        name="lines"
-        value={JSON.stringify(lines.map(({ label, quantity, unit, unitPrice }) => ({ label, quantity, unit, unitPrice })))}
-      />
 
       <div role="radiogroup" aria-label={t("mode")} className="grid grid-cols-2 gap-1 rounded-bouton bg-vert-doux p-1">
         {(["quick", "detailed"] as const).map((value) => (
@@ -99,12 +97,17 @@ export function TakeForm({
         ))}
       </div>
 
-      {state.status === "error" && !state.fields ? <Notice tone="danger">{te(state.error)}</Notice> : null}
 
       {mode === "quick" ? (
         <>
-          <AmountInput label={t("amount")} name="amount" autoFocus onValueChange={setQuickAmount} error={field("amount")} />
-          <TextField label={`${t("note")} (${tc("optional")})`} name="note" placeholder={t("notePlaceholder")} autoComplete="off" />
+          <AmountInput label={t("amount")} name="amount" autoFocus onValueChange={setQuickAmount} error={error === "amountRequired" ? te("amountRequired") : null} />
+          <TextField
+            label={`${t("note")} (${tc("optional")})`}
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            placeholder={t("notePlaceholder")}
+            autoComplete="off"
+          />
         </>
       ) : (
         <fieldset className="flex flex-col gap-3">
@@ -180,8 +183,8 @@ export function TakeForm({
             {t("lines.add")}
           </button>
           <p className="text-xs text-gris-texte">{t("lines.rounding", { step: roundingStep })}</p>
-          {field("lines") ? <Notice tone="danger">{field("lines")}</Notice> : null}
-          <TextField label={`${t("note")} (${tc("optional")})`} name="note" autoComplete="off" />
+          {error === "lineInvalid" ? <Notice tone="danger">{te("lineInvalid")}</Notice> : null}
+          <TextField label={`${t("note")} (${tc("optional")})`} value={note} onChange={(event) => setNote(event.target.value)} autoComplete="off" />
         </fieldset>
       )}
 
@@ -198,12 +201,12 @@ export function TakeForm({
               <p className="text-xs font-semibold text-gris-texte">{t("newBalance")}</p>
               <Balance value={newBalance} />
             </div>
-            <SubmitButton variant="accent" pendingLabel={t("saving")} disabled={total <= 0} className="flex-1 py-2 text-lg sm:flex-none sm:px-8">
+            <Button type="submit" variant="accent" disabled={total <= 0 || saving} className="flex-1 py-2 text-lg sm:flex-none sm:px-8">
               <span className="flex flex-col leading-tight">
                 <span>{t("saveTake")}</span>
                 <span className="montant text-base">{formatAmount(total)}</span>
               </span>
-            </SubmitButton>
+            </Button>
           </div>
         </div>
       </div>

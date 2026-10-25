@@ -4,7 +4,8 @@ import { can } from "@/modules/auth-accounts";
 import { requirePageAccount, signOutAction } from "@/modules/auth-accounts/server";
 import { ShopSwitcher } from "@/modules/shops";
 import { getCurrentShop, setCurrentShopAction } from "@/modules/shops/server";
-import { Button, LogoMark } from "@/shared/ui";
+import { SignOutButton, SyncIndicator, SyncProvider } from "@/modules/sync";
+import { LogoMark } from "@/shared/ui";
 import { countPendingRequests } from "@/modules/customers/server";
 import { navigation } from "./_shell/nav";
 import { NavLinks } from "./_shell/NavLinks";
@@ -23,7 +24,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const nav = await navigation(account, pending);
   const roleLabel = account.role ? t(`accounts.roles.${account.role}`) : "";
 
-  return (
+  const works = can(account.role, "workInShop");
+  const shell = (
     <div className="min-h-dvh lg:pl-68">
       {/* Ordinateur : menu latéral */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-68 flex-col gap-6 bg-vert-principal px-4 py-6 text-white lg:flex">
@@ -44,14 +46,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="flex-1">
           <NavLinks items={nav.all} variant="side" label={t("nav.label")} />
         </div>
+        {works ? <SyncIndicator /> : null}
         <div className="border-t border-white/15 px-2 pt-4">
           <p className="truncate font-bold">{account.fullName}</p>
           <p className="truncate text-sm text-white/75">{roleLabel}</p>
-          <form action={signOutAction} className="mt-3">
-            <Button type="submit" variant="ghost" className="min-h-11 w-full justify-start px-0 text-sm text-white hover:bg-white/10">
-              {t("auth.signOut")}
-            </Button>
-          </form>
+          <div className="mt-3">
+            <SignOutButton action={signOutAction} userId={account.userId} className="min-h-11 justify-start px-0 text-sm text-white hover:bg-white/10" />
+          </div>
         </div>
       </aside>
 
@@ -66,11 +67,21 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <p className="truncate font-bold">{currentShop?.name ?? t("app.name")}</p>
             )}
           </div>
+          {works ? <SyncIndicator compact /> : null}
         </div>
       </header>
 
       <main className="mx-auto max-w-5xl px-4 pt-6 pb-28 sm:px-6 lg:px-10 lg:py-10">{children}</main>
       <NavLinks items={nav.bottom} variant="bottom" label={t("nav.label")} />
     </div>
+  );
+
+  // Hors ligne : la file d'envoi et le téléchargement ne concernent que les comptes qui travaillent en boutique.
+  return works ? (
+    <SyncProvider userId={account.userId} shopIds={account.shops.map((s) => s.id)}>
+      {shell}
+    </SyncProvider>
+  ) : (
+    shell
   );
 }
