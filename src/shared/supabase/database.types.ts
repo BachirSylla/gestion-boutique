@@ -71,11 +71,13 @@ export type Database = {
           decision_note: string | null
           device_created_at: string
           id: string
-          operation_id: string
+          operation_id: string | null
           reason: string
           requested_by: string
           shop_id: string
           status: string
+          stock_cancellation_id: string | null
+          stock_movement_id: string | null
         }
         Insert: {
           cancellation_id?: string | null
@@ -85,11 +87,13 @@ export type Database = {
           decision_note?: string | null
           device_created_at: string
           id: string
-          operation_id: string
+          operation_id?: string | null
           reason: string
           requested_by: string
           shop_id: string
           status?: string
+          stock_cancellation_id?: string | null
+          stock_movement_id?: string | null
         }
         Update: {
           cancellation_id?: string | null
@@ -99,11 +103,13 @@ export type Database = {
           decision_note?: string | null
           device_created_at?: string
           id?: string
-          operation_id?: string
+          operation_id?: string | null
           reason?: string
           requested_by?: string
           shop_id?: string
           status?: string
+          stock_cancellation_id?: string | null
+          stock_movement_id?: string | null
         }
         Relationships: [
           {
@@ -118,6 +124,20 @@ export type Database = {
             columns: ["operation_id", "shop_id"]
             isOneToOne: false
             referencedRelation: "customer_operations"
+            referencedColumns: ["id", "shop_id"]
+          },
+          {
+            foreignKeyName: "cancellation_requests_stock_cancellation_id_fkey"
+            columns: ["stock_cancellation_id"]
+            isOneToOne: false
+            referencedRelation: "stock_movements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cancellation_requests_stock_fk"
+            columns: ["stock_movement_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "stock_movements"
             referencedColumns: ["id", "shop_id"]
           },
         ]
@@ -258,6 +278,172 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "shops"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      lots: {
+        Row: {
+          created_by: string
+          id: string
+          package_count: number
+          product_id: string
+          purchase_price: number
+          received_at: string
+          server_created_at: string
+          shop_id: string
+          source: string
+          supplier: string | null
+        }
+        Insert: {
+          created_by: string
+          id: string
+          package_count: number
+          product_id: string
+          purchase_price: number
+          received_at: string
+          server_created_at?: string
+          shop_id: string
+          source?: string
+          supplier?: string | null
+        }
+        Update: {
+          created_by?: string
+          id?: string
+          package_count?: number
+          product_id?: string
+          purchase_price?: number
+          received_at?: string
+          server_created_at?: string
+          shop_id?: string
+          source?: string
+          supplier?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lots_product_id_shop_id_fkey"
+            columns: ["product_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "product_prices"
+            referencedColumns: ["product_id", "shop_id"]
+          },
+          {
+            foreignKeyName: "lots_product_id_shop_id_fkey"
+            columns: ["product_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id", "shop_id"]
+          },
+        ]
+      }
+      package_price_segments: {
+        Row: {
+          created_at: string
+          id: string
+          opening_id: string
+          package_id: string
+          retail_price: number
+          shop_id: string
+          start_remaining: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          opening_id: string
+          package_id: string
+          retail_price: number
+          shop_id: string
+          start_remaining: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          opening_id?: string
+          package_id?: string
+          retail_price?: number
+          shop_id?: string
+          start_remaining?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_price_segments_package_id_shop_id_fkey"
+            columns: ["package_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "package_reviews"
+            referencedColumns: ["package_id", "shop_id"]
+          },
+          {
+            foreignKeyName: "package_price_segments_package_id_shop_id_fkey"
+            columns: ["package_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id", "shop_id"]
+          },
+        ]
+      }
+      packages: {
+        Row: {
+          finished_at: string | null
+          id: string
+          lot_id: string
+          opened_at: string | null
+          opening_id: string | null
+          product_id: string
+          remaining_estimate: number | null
+          removed_by: string | null
+          seq: number
+          shop_id: string
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          finished_at?: string | null
+          id?: string
+          lot_id: string
+          opened_at?: string | null
+          opening_id?: string | null
+          product_id: string
+          remaining_estimate?: number | null
+          removed_by?: string | null
+          seq: number
+          shop_id: string
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          finished_at?: string | null
+          id?: string
+          lot_id?: string
+          opened_at?: string | null
+          opening_id?: string | null
+          product_id?: string
+          remaining_estimate?: number | null
+          removed_by?: string | null
+          seq?: number
+          shop_id?: string
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packages_lot_id_shop_id_fkey"
+            columns: ["lot_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "lots"
+            referencedColumns: ["id", "shop_id"]
+          },
+          {
+            foreignKeyName: "packages_product_id_shop_id_fkey"
+            columns: ["product_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "product_prices"
+            referencedColumns: ["product_id", "shop_id"]
+          },
+          {
+            foreignKeyName: "packages_product_id_shop_id_fkey"
+            columns: ["product_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id", "shop_id"]
           },
         ]
       }
@@ -696,6 +882,92 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_movements: {
+        Row: {
+          amount: number | null
+          author_id: string
+          cancels_movement_id: string | null
+          customer_operation_id: string | null
+          device_created_at: string
+          id: string
+          kind: string
+          lot_id: string | null
+          package_id: string | null
+          product_id: string
+          quantity: number | null
+          reason: string | null
+          remaining_estimate: number | null
+          schema_version: number
+          server_created_at: string
+          shop_id: string
+        }
+        Insert: {
+          amount?: number | null
+          author_id: string
+          cancels_movement_id?: string | null
+          customer_operation_id?: string | null
+          device_created_at: string
+          id: string
+          kind: string
+          lot_id?: string | null
+          package_id?: string | null
+          product_id: string
+          quantity?: number | null
+          reason?: string | null
+          remaining_estimate?: number | null
+          schema_version?: number
+          server_created_at?: string
+          shop_id: string
+        }
+        Update: {
+          amount?: number | null
+          author_id?: string
+          cancels_movement_id?: string | null
+          customer_operation_id?: string | null
+          device_created_at?: string
+          id?: string
+          kind?: string
+          lot_id?: string | null
+          package_id?: string | null
+          product_id?: string
+          quantity?: number | null
+          reason?: string | null
+          remaining_estimate?: number | null
+          schema_version?: number
+          server_created_at?: string
+          shop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_cancels_movement_id_shop_id_fkey"
+            columns: ["cancels_movement_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "stock_movements"
+            referencedColumns: ["id", "shop_id"]
+          },
+          {
+            foreignKeyName: "stock_movements_customer_operation_id_fkey"
+            columns: ["customer_operation_id"]
+            isOneToOne: false
+            referencedRelation: "customer_operations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_product_id_shop_id_fkey"
+            columns: ["product_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "product_prices"
+            referencedColumns: ["product_id", "shop_id"]
+          },
+          {
+            foreignKeyName: "stock_movements_product_id_shop_id_fkey"
+            columns: ["product_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id", "shop_id"]
+          },
+        ]
+      }
       take_lines: {
         Row: {
           format_count: number | null
@@ -748,6 +1020,20 @@ export type Database = {
             columns: ["operation_id", "shop_id"]
             isOneToOne: false
             referencedRelation: "customer_operations"
+            referencedColumns: ["id", "shop_id"]
+          },
+          {
+            foreignKeyName: "take_lines_package_fk"
+            columns: ["package_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "package_reviews"
+            referencedColumns: ["package_id", "shop_id"]
+          },
+          {
+            foreignKeyName: "take_lines_package_fk"
+            columns: ["package_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
             referencedColumns: ["id", "shop_id"]
           },
           {
@@ -825,6 +1111,44 @@ export type Database = {
           },
         ]
       }
+      package_reviews: {
+        Row: {
+          account_takes: number | null
+          cost: number | null
+          estimated_cash_sales: number | null
+          expected_revenue: number | null
+          finished_at: string | null
+          gross_margin: number | null
+          lot_id: string | null
+          opened_at: string | null
+          package_id: string | null
+          product_id: string | null
+          shop_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packages_lot_id_shop_id_fkey"
+            columns: ["lot_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "lots"
+            referencedColumns: ["id", "shop_id"]
+          },
+          {
+            foreignKeyName: "packages_product_id_shop_id_fkey"
+            columns: ["product_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "product_prices"
+            referencedColumns: ["product_id", "shop_id"]
+          },
+          {
+            foreignKeyName: "packages_product_id_shop_id_fkey"
+            columns: ["product_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id", "shop_id"]
+          },
+        ]
+      }
       product_prices: {
         Row: {
           activated_at: string | null
@@ -853,6 +1177,17 @@ export type Database = {
     }
     Functions: {
       add_starter_catalog: { Args: { p_shop_id: string }; Returns: number }
+      adjust_stock: {
+        Args: {
+          p_delta: number
+          p_device_created_at: string
+          p_id: string
+          p_product_id: string
+          p_purchase_price: number
+          p_reason: string
+        }
+        Returns: Json
+      }
       cancel_operation: {
         Args: {
           p_device_created_at: string
@@ -865,6 +1200,15 @@ export type Database = {
       cancel_pending_price: {
         Args: { p_product_id: string }
         Returns: undefined
+      }
+      cancel_stock_movement: {
+        Args: {
+          p_device_created_at: string
+          p_id: string
+          p_movement_id: string
+          p_reason: string
+        }
+        Returns: Json
       }
       change_price: {
         Args: {
@@ -902,6 +1246,42 @@ export type Database = {
         }
         Returns: Json
       }
+      estimate_remaining: {
+        Args: {
+          p_device_created_at: string
+          p_estimate: number
+          p_id: string
+          p_product_id: string
+        }
+        Returns: Json
+      }
+      finish_package: {
+        Args: {
+          p_device_created_at: string
+          p_id: string
+          p_product_id: string
+        }
+        Returns: Json
+      }
+      open_package: {
+        Args: {
+          p_device_created_at: string
+          p_id: string
+          p_product_id: string
+        }
+        Returns: Json
+      }
+      receive_lot: {
+        Args: {
+          p_count: number
+          p_device_created_at: string
+          p_id: string
+          p_product_id: string
+          p_purchase_price: number
+          p_supplier: string
+        }
+        Returns: Json
+      }
       record_payment: {
         Args: {
           p_amount: number
@@ -931,6 +1311,26 @@ export type Database = {
           p_id: string
           p_operation_id: string
           p_reason: string
+        }
+        Returns: Json
+      }
+      request_stock_cancellation: {
+        Args: {
+          p_device_created_at: string
+          p_id: string
+          p_movement_id: string
+          p_reason: string
+        }
+        Returns: Json
+      }
+      sell_whole_package: {
+        Args: {
+          p_customer_id: string
+          p_device_created_at: string
+          p_id: string
+          p_price: number
+          p_product_id: string
+          p_take_id: string
         }
         Returns: Json
       }
