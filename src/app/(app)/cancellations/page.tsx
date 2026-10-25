@@ -34,17 +34,32 @@ export default async function CancellationsPage({ searchParams }: { searchParams
           {requests.map((request) => (
             <li key={request.id}>
               <Card>
-                <Link href={customerHref(request.customer.id)} className="text-lg font-bold text-encre hover:underline">
-                  {request.customer.fullName}
-                </Link>
-                <p className="mt-1 text-encre">
-                  {t("cancellations.operation", {
-                    kind: t(`ledger.kinds.${request.operation.kind as "take"}`),
-                    amount: formatAmount(request.operation.amount ?? 0),
-                    date: date(request.operation.deviceCreatedAt),
-                    author: request.operation.authorName,
-                  })}
-                </p>
+                {request.customer && request.operation ? (
+                  <>
+                    <Link href={customerHref(request.customer.id)} className="text-lg font-bold text-encre hover:underline">
+                      {request.customer.fullName}
+                    </Link>
+                    <p className="mt-1 text-encre">
+                      {t("cancellations.operation", {
+                        kind: t(`ledger.kinds.${request.operation.kind as "take"}`),
+                        amount: formatAmount(request.operation.amount ?? 0),
+                        date: date(request.operation.deviceCreatedAt),
+                        author: request.operation.authorName,
+                      })}
+                    </p>
+                  </>
+                ) : request.movement ? (
+                  <>
+                    <p className="text-lg font-bold text-encre">{request.movement.productName}</p>
+                    <p className="mt-1 text-encre">
+                      {t("cancellations.movement", {
+                        kind: t(`stock.kinds.${request.movement.kind as "open"}`),
+                        date: date(request.movement.deviceCreatedAt),
+                        author: request.movement.authorName,
+                      })}
+                    </p>
+                  </>
+                ) : null}
                 <p className="mt-2 rounded-bouton bg-safran-doux px-3 py-2 text-encre italic">{request.reason}</p>
                 <p className="mt-1 text-sm text-gris-texte">{t("cancellations.requestedBy", { name: request.requestedBy, date: date(request.createdAt) })}</p>
                 <div className="mt-4 grid gap-2 sm:grid-cols-2">

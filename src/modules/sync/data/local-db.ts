@@ -45,7 +45,9 @@ export interface LocalLine {
 export interface LocalRequest {
   id: string;
   shopId: string;
-  operationId: string;
+  /** Opération client visée, ou null pour une demande sur un mouvement de stock. */
+  operationId: string | null;
+  stockMovementId?: string | null;
   status: "pending" | "approved" | "rejected";
   reason: string;
   requestedBy: string;
@@ -81,6 +83,44 @@ export interface LocalProduct {
   pendingRetailPrice: Amount | null;
 }
 
+export interface LocalPackage {
+  id: string;
+  shopId: string;
+  productId: string;
+  lotId: string;
+  state: "closed" | "opened";
+  openedAt: string | null;
+  remainingEstimate: number | null;
+}
+
+export interface LocalMovement {
+  id: string;
+  shopId: string;
+  productId: string;
+  kind: "reception" | "open" | "finish" | "whole_sale" | "adjustment" | "estimate" | "cancellation";
+  quantity: number | null;
+  amount: Amount | null;
+  reason: string | null;
+  cancelsMovementId: string | null;
+  customerOperationId: string | null;
+  authorId: string;
+  deviceCreatedAt: string;
+  serverCreatedAt: string;
+}
+
+export interface LocalReview {
+  packageId: string;
+  shopId: string;
+  productId: string;
+  openedAt: string | null;
+  finishedAt: string | null;
+  expectedRevenue: Amount;
+  accountTakes: Amount;
+  estimatedCashSales: Amount;
+  cost: Amount;
+  grossMargin: Amount;
+}
+
 export interface LocalProfile {
   userId: string;
   fullName: string;
@@ -99,6 +139,9 @@ export class LocalDatabase extends Dexie {
   shops!: Table<LocalShop, string>;
   profiles!: Table<LocalProfile, string>;
   products!: Table<LocalProduct, string>;
+  packages!: Table<LocalPackage, string>;
+  movements!: Table<LocalMovement, string>;
+  reviews!: Table<LocalReview, string>;
   outbox!: Table<OutboxEntry, number>;
   meta!: Table<MetaRow, string>;
 
@@ -116,6 +159,8 @@ export class LocalDatabase extends Dexie {
     });
     // Jalon 5 : catalogue et prix sur l'appareil.
     this.version(2).stores({ products: "id, shopId" });
+    // Jalon 5b : stock courant, derniers mouvements et bilans de sac.
+    this.version(3).stores({ packages: "id, shopId, productId", movements: "id, shopId, productId", reviews: "packageId, shopId, productId" });
   }
 }
 

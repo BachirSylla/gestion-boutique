@@ -1,6 +1,7 @@
 // Interface publique du module sync (hors ligne et synchronisation).
 export {
   classifyOutcome,
+  isCustomerCommand,
   countedOperations,
   mergeOperations,
   pendingRequestTargets,
@@ -13,7 +14,7 @@ export {
   type TakeLinePayload,
   type ViewOperation,
 } from "./domain/sync";
-export type { LocalCustomer, LocalLine, LocalOperation, LocalProduct, LocalRequest, LocalShop } from "./data/local-db";
+export type { LocalCustomer, LocalLine, LocalMovement, LocalOperation, LocalPackage, LocalProduct, LocalRequest, LocalReview, LocalShop } from "./data/local-db";
 export { SyncProvider, useOptionalSync, useSync, useSyncStatus, clearLocalData } from "./ui/SyncProvider";
 export { SyncIndicator } from "./ui/SyncIndicator";
 export { SignOutButton } from "./ui/SignOutButton";

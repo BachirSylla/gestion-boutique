@@ -150,3 +150,19 @@ describe("rejectionMessage", () => {
     expect(rejectionMessage("XX")).toBe("unexpected");
   });
 });
+
+describe("stock hors ligne", () => {
+  const stockCancel: OutboxCommand = { type: "stock.cancel", shopId: "s1", productId: "riz", movementId: "m-1", reason: null, fallbackReason: "Arrivée hors délai" };
+  it("annulation de mouvement hors délai : devient une demande ; sac déjà entamé : refus visible", () => {
+    expect(classifyOutcome(stockCancel, { code: "BT001" })).toEqual({ kind: "convertToRequest" });
+    expect(toCancellationRequest(entry("c-1", stockCancel), "r-1").command).toEqual({ type: "stock.request", shopId: "s1", productId: "riz", movementId: "m-1", reason: "Arrivée hors délai" });
+    expect(classifyOutcome({ type: "stock.open", shopId: "s1", productId: "riz" }, { code: "BT010" })).toEqual({ kind: "reject", code: "BT010" });
+    expect(rejectionMessage("BT011")).toBe("noClosedPackage");
+  });
+
+  it("vente entière sur compte : la prise compte déjà dans le solde du client", () => {
+    const sell = entry("m-2", { type: "stock.sell", shopId: "s1", productId: "riz", price: 15000, customerId: "awa", takeId: "t-1" });
+    expect(computeBalance(countedOperations(mergeOperations([], [sell], "awa"))).balance).toBe(-15000);
+    expect(summarizeByCustomer([], [sell]).get("awa")?.balance).toBe(-15000);
+  });
+});

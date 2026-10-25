@@ -300,7 +300,7 @@ function CustomerSheet({
   const counted = operations.filter((o) => !o.rejected);
   const cancelledIds = new Set(counted.filter((o) => o.kind === "cancellation").map((o) => o.cancelsOperationId));
   const requested = pendingRequestTargets(data.outbox);
-  for (const r of data.requests) if (r.status === "pending") requested.add(r.operationId);
+  for (const r of data.requests) if (r.status === "pending" && r.operationId) requested.add(r.operationId);
   const now = new Date();
   const pathFor = (op: SheetOperation) =>
     canRecord && !op.rejected

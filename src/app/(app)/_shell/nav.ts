@@ -20,7 +20,9 @@ export async function navigation(account: Pick<CurrentAccount, "role">, pendingC
 
   const all: NavItem[] = [
     item("/", "home", t("home")),
-    ...(can(role, "viewCustomers") ? [item("/customers", "customers", t("customers")), item("/reminders", "reminders", t("reminders"))] : []),
+    ...(can(role, "viewCustomers")
+      ? [item("/customers", "customers", t("customers")), item("/stock", "stock", t("stock")), item("/reminders", "reminders", t("reminders"))]
+      : []),
     ...(can(role, "decideCancellations") ? [item("/cancellations", "cancellations", t("cancellations"), pendingCancellations)] : []),
     ...(can(role, "manageCatalog") ? [item("/catalog", "catalog", t("catalog"))] : []),
     ...(can(role, "manageTeam") ? [item("/team", "team", t("team"))] : []),
@@ -30,7 +32,7 @@ export async function navigation(account: Pick<CurrentAccount, "role">, pendingC
   ];
   const bottom: NavItem[] = [
     item("/", "home", t("home")),
-    ...(can(role, "viewCustomers") ? [item("/customers", "customers", t("customers")), item("/reminders", "reminders", t("reminders"))] : []),
+    ...(can(role, "viewCustomers") ? [item("/customers", "customers", t("customers")), item("/stock", "stock", t("stock"))] : []),
     item("/menu", "menu", t("menu"), pendingCancellations),
   ];
   return { bottom, all };

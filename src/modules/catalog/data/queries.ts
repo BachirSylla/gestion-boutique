@@ -61,6 +61,13 @@ export async function listProducts(shopId: string, options: { includeArchived?: 
   });
 }
 
+/** Un conditionnement de ce produit est-il entamé ? (un changement immédiat demande alors d'estimer son reste) */
+export async function hasOpenedPackage(productId: string): Promise<boolean> {
+  const supabase = await getServerSupabase();
+  const { count } = await supabase.from("packages").select("id", { count: "exact", head: true }).eq("product_id", productId).eq("state", "opened");
+  return (count ?? 0) > 0;
+}
+
 export async function getProduct(productId: string): Promise<{ product: ProductRow; history: PriceVersionRow[] } | null> {
   const supabase = await getServerSupabase();
   const { data: row } = await supabase.from("products").select("shop_id").eq("id", productId).maybeSingle();

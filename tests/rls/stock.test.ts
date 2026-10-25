@@ -287,3 +287,39 @@ describe("droits et immuabilité", () => {
       expect((await ctx.tryQuery("delete from public.lots")).error).toMatch(/immuable/);
     }));
 });
+
+describe("bilan : base de données = TypeScript", () => {
+  it("40 conditionnements aux tranches tirées au hasard donnent le même chiffre attendu", () =>
+    scenario(async (ctx) => {
+      const { expectedRevenue } = await import("@/modules/stock/domain/stock");
+      const w = await seedWorld(ctx);
+      await ctx.asSystem();
+      const cases: { packageId: string; capacity: number; segments: { startRemaining: number; retailPrice: number; createdAt: string }[] }[] = [];
+      const statements: string[] = [];
+      for (let i = 0; i < 40; i++) {
+        const productId = randomUUID();
+        const lotId = randomUUID();
+        const packageId = randomUUID();
+        const openingId = randomUUID();
+        const capacity = [20_000, 25_000, 48_000, 50_000][i % 4]!;
+        const starts = [1000, ...[750, 500, 250, 100].filter(() => Math.random() < 0.4)];
+        const segments = starts.map((s, n) => ({ startRemaining: s, retailPrice: 200 + Math.floor(Math.random() * 1000), createdAt: new Date(Date.UTC(2026, 9, 25, 8, n)).toISOString() }));
+        cases.push({ packageId, capacity, segments });
+        statements.push(
+          `insert into public.products (id, shop_id, name, package_label, sale_unit, capacity_milli) values ('${productId}', '${w.shopA1}', 'P${i}', 'sac', 'kg', ${capacity})`,
+          `insert into public.lots (id, shop_id, product_id, package_count, purchase_price, received_at, created_by) values ('${lotId}', '${w.shopA1}', '${productId}', 1, 1000, now(), '${w.ownerA}')`,
+          `insert into public.packages (id, shop_id, product_id, lot_id, seq, state, opening_id, opened_at, finished_at) values ('${packageId}', '${w.shopA1}', '${productId}', '${lotId}', 1, 'finished', '${openingId}', now(), now())`,
+          ...segments.map(
+            (s) =>
+              `insert into public.package_price_segments (shop_id, package_id, opening_id, start_remaining, retail_price, created_at) values ('${w.shopA1}', '${packageId}', '${openingId}', ${s.startRemaining}, ${s.retailPrice}, '${s.createdAt}')`,
+          ),
+        );
+      }
+      await ctx.db.query(statements.join(";\n"));
+      const rows = await ctx.rows<{ package_id: string; expected_revenue: string }>("select package_id, expected_revenue from public.package_reviews where package_id = any($1)", [
+        cases.map((c) => c.packageId),
+      ]);
+      const sql = new Map(rows.map((r) => [r.package_id, Number(r.expected_revenue)]));
+      for (const c of cases) expect(sql.get(c.packageId), c.packageId).toBe(expectedRevenue(c.segments, c.capacity));
+    }));
+});

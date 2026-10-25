@@ -1,7 +1,7 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import type { LocalCustomer, LocalLine, LocalOperation, LocalProduct, LocalProfile, LocalRequest, LocalShop } from "../data/local-db";
+import type { LocalCustomer, LocalLine, LocalMovement, LocalOperation, LocalPackage, LocalProduct, LocalProfile, LocalRequest, LocalReview, LocalShop } from "../data/local-db";
 import type { OutboxEntry } from "../domain/sync";
 import { useOptionalSync } from "./SyncProvider";
 
@@ -13,6 +13,9 @@ export interface LocalShopData {
   profiles: Map<string, string>;
   requests: LocalRequest[];
   products: LocalProduct[];
+  packages: LocalPackage[];
+  movements: LocalMovement[];
+  reviews: LocalReview[];
   /** Le premier téléchargement n'a jamais eu lieu sur cet appareil. */
   neverSynced: boolean;
 }
@@ -23,7 +26,7 @@ export function useLocalShop(shopId: string): LocalShopData | undefined {
   const db = useOptionalSync()?.engine.db;
   return useLiveQuery(async () => {
     if (!db) return undefined;
-    const [customers, operations, outbox, shop, profiles, requests, products, cursor] = await Promise.all([
+    const [customers, operations, outbox, shop, profiles, requests, products, packages, movements, reviews, cursor] = await Promise.all([
       db.customers.where("shopId").equals(shopId).toArray(),
       db.operations.where("shopId").equals(shopId).toArray(),
       db.outbox.orderBy("seq").toArray(),
@@ -31,6 +34,9 @@ export function useLocalShop(shopId: string): LocalShopData | undefined {
       db.profiles.toArray(),
       db.requests.where("shopId").equals(shopId).toArray(),
       db.products.where("shopId").equals(shopId).sortBy("name"),
+      db.packages.where("shopId").equals(shopId).toArray(),
+      db.movements.where("shopId").equals(shopId).toArray(),
+      db.reviews.where("shopId").equals(shopId).toArray(),
       db.meta.get(`cursor:${shopId}:customers`),
     ]);
     return {
@@ -41,6 +47,9 @@ export function useLocalShop(shopId: string): LocalShopData | undefined {
       profiles: new Map(profiles.map((p: LocalProfile) => [p.userId, p.fullName])),
       requests,
       products,
+      packages,
+      movements,
+      reviews,
       neverSynced: !shop && !cursor,
     };
   }, [db, shopId]);

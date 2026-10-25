@@ -30,6 +30,8 @@ export function SyncPanel() {
         return t("ledger.requestCancel");
       case "customer.create":
         return `${t("customers.new")} · ${c.customer.fullName}`;
+      default:
+        return t(`stock.kinds.${c.type.replace("stock.", "") as "open"}`);
     }
   };
 

@@ -138,9 +138,11 @@ export function PriceChangeForm({
   unitLabel,
   roundingStep,
   policies,
+  hasOpenedPackage = false,
 }: {
   action: Action;
   productId: string;
+  hasOpenedPackage?: boolean;
   current: { retailPrice: number; packagePrice: number | null; formats: PriceFormat[] };
   unitLabel: string;
   roundingStep: RoundingStep;
@@ -186,6 +188,17 @@ export function PriceChangeForm({
           options={(["immediate", "after_sellout"] as const).map((value) => ({ value, label: t(`policy.${value}`), hint: t(`policy.${value}Hint`) }))}
         />
       </div>
+      {effectivePolicy === "immediate" && hasOpenedPackage ? (
+        <ChoiceGroup
+          legend={t("remainingEstimate")}
+          hint={t("remainingEstimateHint")}
+          name="remainingEstimate"
+          type="radio"
+          defaultValues={["500"]}
+          options={([1000, 750, 500, 250, 100] as const).map((value) => ({ value: String(value), label: t(`estimates.${value}`) }))}
+          error={field("remainingEstimate")}
+        />
+      ) : null}
       <SubmitButton variant="primary" pendingLabel={tc("saving")}>
         {t("changePrice")}
       </SubmitButton>

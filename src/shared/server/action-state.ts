@@ -27,6 +27,11 @@ export type ActionErrorCode =
   | "typeRequired"
   | "invalidAmount"
   | "invalidDueDay"
+  | "alreadyOpened"
+  | "noClosedPackage"
+  | "noOpenedPackage"
+  | "stockChanged"
+  | "estimateRequired"
   | "unexpected";
 
 export type ActionState<T = null> =
@@ -67,6 +72,16 @@ export function errorFromDatabase(error: { code?: string; message?: string }): A
       return "invalidInput";
     case "BT006":
       return "requestPending";
+    case "BT010":
+      return "alreadyOpened";
+    case "BT011":
+      return "noClosedPackage";
+    case "BT012":
+      return "noOpenedPackage";
+    case "BT013":
+      return "stockChanged";
+    case "BT014":
+      return "estimateRequired";
   }
   return "unexpected";
 }

@@ -51,7 +51,12 @@
     "noShop": "Aucune boutique sélectionnée.",
     "typeRequired": "Choisissez le type de compte.",
     "invalidAmount": "Montant invalide (nombre entier, sans virgule).",
-    "invalidDueDay": "Jour d'échéance entre 1 et 28 (ou vide pour la fin du mois)."
+    "invalidDueDay": "Jour d'échéance entre 1 et 28 (ou vide pour la fin du mois).",
+    "alreadyOpened": "Un conditionnement de ce produit est déjà entamé.",
+    "noClosedPackage": "Aucun conditionnement fermé en stock.",
+    "noOpenedPackage": "Aucun conditionnement entamé pour ce produit.",
+    "stockChanged": "Le stock a changé entre-temps : ce mouvement ne peut plus être annulé.",
+    "estimateRequired": "Estimez le reste du conditionnement entamé."
   },
   "auth": {
     "login": {
@@ -111,7 +116,8 @@
     "cancellations": "Annulations",
     "settings": "Réglages",
     "sync": "Synchronisation",
-    "catalog": "Catalogue"
+    "catalog": "Catalogue",
+    "stock": "Stock"
   },
   "shell": {
     "currentShop": "Boutique",
@@ -436,7 +442,8 @@
     "reject": "Refuser",
     "approved": "Annulation validée.",
     "rejected": "Demande refusée.",
-    "pendingCount": "{count, plural, one {# demande d'annulation en attente} other {# demandes d'annulation en attente}}"
+    "pendingCount": "{count, plural, one {# demande d'annulation en attente} other {# demandes d'annulation en attente}}",
+    "movement": "{kind} du {date}, saisi par {author}"
   },
   "settings": {
     "title": "Réglages de la boutique",
@@ -569,6 +576,121 @@
       "initial": "Prix de départ",
       "immediate": "Appliqué tout de suite",
       "after_sellout": "Après écoulement"
+    },
+    "remainingEstimate": "Reste estimé du conditionnement entamé",
+    "remainingEstimateHint": "Sert à découper son chiffre attendu : la partie déjà vendue reste à l'ancien prix.",
+    "estimates": {
+      "100": "Presque vide",
+      "250": "¼",
+      "500": "½",
+      "750": "¾",
+      "1000": "Plein"
+    }
+  },
+  "stock": {
+    "title": "Stock",
+    "emptyCatalog": "Aucun produit : le propriétaire crée le catalogue dans Catalogue.",
+    "noResult": "Aucun produit ne correspond.",
+    "filters": {
+      "all": "Tous",
+      "opened": "Entamés",
+      "reorder": "À racheter"
+    },
+    "packaging": "{label} de {capacity} {unit}",
+    "units": {
+      "kg": "kg",
+      "l": "L",
+      "piece": "pièce",
+      "sachet": "sachet"
+    },
+    "toReorder": "À racheter",
+    "closedCount": "{count, plural, =0 {Aucun {label} fermé} one {# {label} fermé} other {# {label}s fermés}}",
+    "openedWith": "1 entamé ({remaining})",
+    "noneOpened": "Aucun entamé",
+    "pendingShort": "En attente d'envoi",
+    "rupture": "Rupture estimée vers le {date} (≈ {days, plural, one {# jour} other {# jours}})",
+    "pictoLabel": "{closed, number} fermés, {opened, number} entamé",
+    "retail": "Prix de détail : {price} / {unit}",
+    "pendingPrice": "Prix en attente : {price}, appliqué au prochain arrivage",
+    "estimates": {
+      "full": "plein",
+      "threeQuarters": "¾",
+      "half": "½",
+      "quarter": "¼",
+      "almostEmpty": "presque vide",
+      "unknown": "reste inconnu"
+    },
+    "estimateTitle": "Reste estimé du conditionnement entamé",
+    "estimated": "Reste estimé enregistré.",
+    "actions": {
+      "open": "Ouvrir",
+      "finish": "Terminé",
+      "sell": "Vendre entier",
+      "receive": "Réception"
+    },
+    "opened": "{product} : conditionnement ouvert.",
+    "finished": "{product} : conditionnement terminé, bilan calculé à la synchronisation.",
+    "finishConfirm": "Le conditionnement entamé de {product} est-il bien terminé ?",
+    "received": "{count, number} {label}(s) reçu(s).",
+    "sold": "{label} vendu entier : {price}.",
+    "kinds": {
+      "receive": "Réception",
+      "reception": "Réception",
+      "open": "Ouverture",
+      "finish": "Fin du conditionnement",
+      "sell": "Vente entière",
+      "whole_sale": "Vente entière",
+      "estimate": "Reste estimé",
+      "adjust": "Ajustement d'inventaire",
+      "adjustment": "Ajustement d'inventaire",
+      "cancel": "Annulation",
+      "cancellation": "Annulation",
+      "request": "Demande d'annulation"
+    },
+    "reviews": {
+      "title": "Bilans de sac",
+      "hint": "Calculés à la fin de chaque conditionnement. Les prises en mode rapide ne sont pas rattachées à un produit : le comptant estimé est une approximation.",
+      "empty": "Aucun conditionnement terminé pour l'instant.",
+      "finishedOn": "Terminé le {date}",
+      "duration": "écoulé en {days, plural, =0 {moins d'un jour} one {# jour} other {# jours}}",
+      "expected": "Chiffre attendu",
+      "accountTakes": "Prises à compte",
+      "cashSales": "Comptant estimé",
+      "cost": "Coût (prix d'achat)",
+      "margin": "Marge brute"
+    },
+    "movements": {
+      "title": "Mouvements",
+      "empty": "Aucun mouvement pour l'instant."
+    },
+    "receive": {
+      "title": "Réception",
+      "count": "Nombre de {label}s",
+      "purchasePrice": "Prix d'achat par {label}",
+      "supplier": "Fournisseur",
+      "submit": "Enregistrer la réception"
+    },
+    "sell": {
+      "title": "Vendre un conditionnement entier",
+      "price": "Prix du {label}",
+      "mode": "Paiement",
+      "cash": "Au comptant",
+      "account": "Sur le compte d'un client",
+      "customer": "Client",
+      "chooseCustomer": "Choisir un client",
+      "submit": "Enregistrer la vente"
+    },
+    "inventory": {
+      "title": "Inventaire",
+      "intro": "Comptez les conditionnements fermés et estimez le reste des entamés. Un écart crée un ajustement, avec votre nom et le motif.",
+      "theoretical": "Théorique : {count, number} {label}(s) fermé(s)",
+      "counted": "{label}s fermés comptés",
+      "remaining": "Reste de l'entamé",
+      "delta": "Écart : {delta}",
+      "reason": "Motif des écarts",
+      "defaultReason": "Inventaire",
+      "submit": "Enregistrer l'inventaire",
+      "done": "{count, plural, =0 {Inventaire : aucun écart.} one {Inventaire : # ajustement enregistré.} other {Inventaire : # ajustements enregistrés.}}"
     }
   }
 }

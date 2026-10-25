@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { PriceChangeForm, ProductInfoForm } from "@/modules/catalog";
-import { cancelPendingPriceAction, changePriceAction, getProduct, updateProductAction } from "@/modules/catalog/server";
+import { cancelPendingPriceAction, changePriceAction, getProduct, hasOpenedPackage, updateProductAction } from "@/modules/catalog/server";
 import { getShopContext } from "@/modules/customers/server";
 import { formatAmount, formatQuantity } from "@/shared/domain";
 import { Badge, Card, ConfirmActionForm, Notice, PageHeader } from "@/shared/ui";
@@ -17,6 +17,7 @@ export default async function ProductPage({ params }: { params: Promise<{ produc
   const t = await getTranslations("catalog");
   const format = await getFormatter();
   const context = await getShopContext(shop);
+  const opened = await hasOpenedPackage(product.id);
   const unit = t(`units.${product.saleUnit}`);
   const date = (iso: string) => format.dateTime(new Date(iso), { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: shop.timezone });
   const describeGrid = (v: { packagePrice: number | null; formats: { label: string; price: number }[] }) =>
@@ -50,6 +51,7 @@ export default async function ProductPage({ params }: { params: Promise<{ produc
                 unitLabel={unit}
                 roundingStep={context.settings.roundingStep}
                 policies={{ hike: context.settings.priceHikePolicy, drop: context.settings.priceDropPolicy }}
+                hasOpenedPackage={opened}
               />
             </Card>
           ) : null}

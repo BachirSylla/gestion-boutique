@@ -1,6 +1,6 @@
 // Moteur de synchronisation : file d'envoi idempotente (dans l'ordre) + téléchargement incrémental.
-import { advanceCursor, classifyOutcome, pullFrom, retryDelay, toCancellationRequest, type OutboxCommand, type OutboxEntry, type RpcErrorLike } from "../domain/sync";
-import type { LocalCustomer, LocalDatabase, LocalLine, LocalOperation, LocalProduct, LocalProfile, LocalRequest, LocalShop } from "./local-db";
+import { advanceCursor, classifyOutcome, isCustomerCommand, pullFrom, retryDelay, toCancellationRequest, type OutboxCommand, type OutboxEntry, type RpcErrorLike } from "../domain/sync";
+import type { LocalCustomer, LocalDatabase, LocalLine, LocalMovement, LocalOperation, LocalPackage, LocalProduct, LocalProfile, LocalRequest, LocalReview, LocalShop } from "./local-db";
 
 export interface PullCursors {
   customers: string | null;
@@ -17,6 +17,10 @@ export interface PullResult {
   profiles: LocalProfile[];
   /** Catalogue complet de la boutique (petit : téléchargé à chaque passage). */
   products?: LocalProduct[];
+  /** Stock courant, derniers mouvements et bilans (petits : remplacés à chaque passage). */
+  packages?: LocalPackage[];
+  movements?: LocalMovement[];
+  reviews?: LocalReview[];
   /** Horodatages serveur vus, pour avancer les curseurs. */
   seen: { customers: string[]; operations: string[]; requests: string[] };
 }
@@ -199,7 +203,30 @@ export class SyncEngine {
         await this.db.customers.update(c.customer.id, { localOnly: false });
         return;
       }
-      if (c.type === "request") return;
+      if (c.type === "request" || c.type === "stock.request") return;
+      if (c.type.startsWith("stock.")) {
+        // Vente entière sur compte : la prise reste visible jusqu'au téléchargement.
+        if (c.type === "stock.sell" && c.customerId && c.takeId && !(await this.db.operations.get(c.takeId))) {
+          await this.db.operations.put({
+            id: c.takeId,
+            shopId: c.shopId,
+            customerId: c.customerId,
+            kind: "take",
+            amount: c.price,
+            cancelsOperationId: null,
+            authorId: entry.authorId,
+            deviceCreatedAt: entry.deviceCreatedAt,
+            serverCreatedAt: new Date(this.now()).toISOString(),
+            provisional: true,
+            note: null,
+            takeMode: "detailed",
+            paymentMethodId: null,
+            cancellationReason: null,
+          });
+        }
+        return;
+      }
+      if (!isCustomerCommand(c)) return;
       const base = {
         id: entry.id,
         shopId: c.shopId,
@@ -245,7 +272,7 @@ export class SyncEngine {
         operations: pullFrom(cursors.operations),
         requests: pullFrom(cursors.requests),
       });
-      await this.db.transaction("rw", [this.db.customers, this.db.operations, this.db.lines, this.db.requests, this.db.shops, this.db.profiles, this.db.products, this.db.meta], async () => {
+      await this.db.transaction("rw", [this.db.customers, this.db.operations, this.db.lines, this.db.requests, this.db.shops, this.db.profiles, this.db.products, this.db.packages, this.db.movements, this.db.reviews, this.db.meta], async () => {
         await this.db.customers.bulkPut(result.customers);
         await this.db.operations.bulkPut(result.operations.map((op) => ({ ...op, provisional: false })));
         // Lignes provisoires (identifiant local) remplacées par celles du serveur.
@@ -258,6 +285,18 @@ export class SyncEngine {
         if (result.products) {
           await this.db.products.where("shopId").equals(shopId).delete();
           await this.db.products.bulkPut(result.products);
+        }
+        if (result.packages) {
+          await this.db.packages.where("shopId").equals(shopId).delete();
+          await this.db.packages.bulkPut(result.packages);
+        }
+        if (result.movements) {
+          await this.db.movements.where("shopId").equals(shopId).delete();
+          await this.db.movements.bulkPut(result.movements);
+        }
+        if (result.reviews) {
+          await this.db.reviews.where("shopId").equals(shopId).delete();
+          await this.db.reviews.bulkPut(result.reviews);
         }
         await this.db.meta.bulkPut([
           { key: `cursor:${shopId}:customers`, value: advanceCursor(cursors.customers, result.seen.customers) },
@@ -277,8 +316,11 @@ export class SyncEngine {
   /** Oublie les données des boutiques qui ne sont plus accessibles (rattachement retiré). */
   async forgetOtherShops(): Promise<void> {
     const keep = new Set(this.options.shopIds);
-    await this.db.transaction("rw", [this.db.customers, this.db.operations, this.db.requests, this.db.shops, this.db.products], async () => {
+    await this.db.transaction("rw", [this.db.customers, this.db.operations, this.db.requests, this.db.shops, this.db.products, this.db.packages, this.db.movements, this.db.reviews], async () => {
       await this.db.products.filter((p) => !keep.has(p.shopId)).delete();
+      await this.db.packages.filter((p) => !keep.has(p.shopId)).delete();
+      await this.db.movements.filter((m) => !keep.has(m.shopId)).delete();
+      await this.db.reviews.filter((r) => !keep.has(r.shopId)).delete();
       await this.db.customers.filter((c) => !keep.has(c.shopId)).delete();
       await this.db.operations.filter((o) => !keep.has(o.shopId)).delete();
       await this.db.requests.filter((r) => !keep.has(r.shopId)).delete();

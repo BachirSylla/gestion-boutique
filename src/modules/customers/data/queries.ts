@@ -190,7 +190,7 @@ export async function getCustomerDetail(customerId: string): Promise<CustomerDet
     }
   }
   for (const r of requests.data ?? []) {
-    const target = byId.get(r.operation_id);
+    const target = r.operation_id ? byId.get(r.operation_id) : undefined;
     if (!target) continue;
     if (r.status === "pending") target.pendingRequest = { id: r.id, reason: r.reason, requestedBy: names.get(r.requested_by) ?? "" };
     else if (!target.lastDecision) target.lastDecision = { status: r.status as "approved" | "rejected", note: r.decision_note };
@@ -266,30 +266,39 @@ export interface PendingRequestRow {
   reason: string;
   createdAt: string;
   requestedBy: string;
-  operation: { id: string; kind: string; amount: Amount | null; deviceCreatedAt: string; authorName: string };
-  customer: { id: string; fullName: string };
+  /** Demande sur une opération client (prise, versement)… */
+  operation?: { id: string; kind: string; amount: Amount | null; deviceCreatedAt: string; authorName: string };
+  customer?: { id: string; fullName: string };
+  /** … ou sur un mouvement de stock. */
+  movement?: { id: string; kind: string; quantity: number | null; amount: Amount | null; deviceCreatedAt: string; authorName: string; productName: string };
 }
 
 export async function listPendingRequests(shopId: string): Promise<PendingRequestRow[]> {
   const supabase = await getServerSupabase();
   const { data: requests, error } = await supabase
     .from("cancellation_requests")
-    .select("id, reason, created_at, requested_by, operation_id")
+    .select("id, reason, created_at, requested_by, operation_id, stock_movement_id")
     .eq("shop_id", shopId)
     .eq("status", "pending")
     .order("created_at");
   if (error) throw new Error(error.message);
   if (!requests?.length) return [];
-  const [ops, profiles] = await Promise.all([
-    supabase
-      .from("customer_operations")
-      .select("id, kind, amount, device_created_at, author_id, customer_id")
-      .in(
-        "id",
-        requests.map((r) => r.operation_id),
-      ),
+  const opIds = requests.flatMap((r) => (r.operation_id ? [r.operation_id] : []));
+  const moveIds = requests.flatMap((r) => (r.stock_movement_id ? [r.stock_movement_id] : []));
+  const [ops, profiles, moves] = await Promise.all([
+    supabase.from("customer_operations").select("id, kind, amount, device_created_at, author_id, customer_id").in("id", opIds),
     supabase.from("profiles").select("user_id, full_name"),
+    supabase.from("stock_movements").select("id, kind, quantity, amount, device_created_at, author_id, product_id").in("id", moveIds),
   ]);
+  const products = await supabase
+    .from("products")
+    .select("id, name")
+    .in(
+      "id",
+      (moves.data ?? []).map((m) => m.product_id),
+    );
+  const productName = new Map((products.data ?? []).map((p) => [p.id, p.name]));
+  const moveById = new Map((moves.data ?? []).map((m) => [m.id, m]));
   if (ops.error) throw new Error(ops.error.message);
   const customers = await supabase
     .from("customers")
@@ -301,8 +310,28 @@ export async function listPendingRequests(shopId: string): Promise<PendingReques
   const names = new Map((profiles.data ?? []).map((p) => [p.user_id, p.full_name]));
   const opById = new Map((ops.data ?? []).map((o) => [o.id, o]));
   const customerById = new Map((customers.data ?? []).map((c) => [c.id, c.full_name]));
-  return requests.flatMap((r) => {
-    const op = opById.get(r.operation_id);
+  return requests.flatMap((r): PendingRequestRow[] => {
+    const move = r.stock_movement_id ? moveById.get(r.stock_movement_id) : undefined;
+    if (move) {
+      return [
+        {
+          id: r.id,
+          reason: r.reason,
+          createdAt: r.created_at,
+          requestedBy: names.get(r.requested_by) ?? "",
+          movement: {
+            id: move.id,
+            kind: move.kind,
+            quantity: move.quantity,
+            amount: move.amount,
+            deviceCreatedAt: move.device_created_at,
+            authorName: names.get(move.author_id) ?? "",
+            productName: productName.get(move.product_id) ?? "",
+          },
+        },
+      ];
+    }
+    const op = r.operation_id ? opById.get(r.operation_id) : undefined;
     if (!op) return [];
     return [
       {

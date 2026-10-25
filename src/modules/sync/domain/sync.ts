@@ -36,7 +36,21 @@ export type OutboxCommand =
   | { type: "take"; customerId: string; shopId: string; mode: "quick" | "detailed"; amount: Amount; note: string | null; lines: TakeLinePayload[] }
   | { type: "payment"; customerId: string; shopId: string; amount: Amount; paymentMethodId: string; note: string | null }
   | { type: "cancel"; customerId: string; shopId: string; operationId: string; reason: string | null; fallbackReason: string }
-  | { type: "request"; customerId: string; shopId: string; operationId: string; reason: string };
+  | { type: "request"; customerId: string; shopId: string; operationId: string; reason: string }
+  // Stock (jalon 5b)
+  | { type: "stock.receive"; shopId: string; productId: string; count: number; purchasePrice: Amount; supplier: string | null }
+  | { type: "stock.open"; shopId: string; productId: string }
+  | { type: "stock.finish"; shopId: string; productId: string }
+  | { type: "stock.sell"; shopId: string; productId: string; price: Amount; customerId: string | null; takeId: string | null }
+  | { type: "stock.estimate"; shopId: string; productId: string; estimate: number }
+  | { type: "stock.adjust"; shopId: string; productId: string; delta: number; reason: string | null; purchasePrice: Amount | null }
+  | { type: "stock.cancel"; shopId: string; productId: string; movementId: string; reason: string | null; fallbackReason: string }
+  | { type: "stock.request"; shopId: string; productId: string; movementId: string; reason: string };
+
+/** Commande qui modifie le journal client (et donc les soldes). */
+export function isCustomerCommand(c: OutboxCommand): c is Extract<OutboxCommand, { type: "take" | "payment" | "cancel" | "request" }> {
+  return c.type === "take" || c.type === "payment" || c.type === "cancel" || c.type === "request";
+}
 
 export interface OutboxEntry {
   /** Identifiant de l'opération, généré sur l'appareil (clé d'idempotence côté serveur). */
@@ -72,14 +86,15 @@ export type SendOutcome =
   /** Annulation arrivée hors délai : devient une demande d'annulation au propriétaire. */
   | { kind: "convertToRequest" };
 
-const REJECT_CODES = /^(42501|BT00[0-9]|23\d{3}|22\d{3}|P0001|P0002|PGRST1\d\d)$/;
+const REJECT_CODES = /^(42501|BT0\d\d|23\d{3}|22\d{3}|P0001|P0002|PGRST1\d\d)$/;
 
 export function classifyOutcome(command: OutboxCommand, error: RpcErrorLike | null): SendOutcome {
   if (!error) return { kind: "done" };
   const code = error.code ?? "";
-  if (command.type === "cancel" && code === "BT001") return { kind: "convertToRequest" };
+  if ((command.type === "cancel" || command.type === "stock.cancel") && code === "BT001") return { kind: "convertToRequest" };
   // Déjà en attente / déjà annulée : l'effet voulu est atteint, rien à refaire.
-  if ((command.type === "request" && code === "BT006") || (command.type === "cancel" && code === "BT002")) return { kind: "done" };
+  if ((command.type === "request" || command.type === "stock.request") && code === "BT006") return { kind: "done" };
+  if ((command.type === "cancel" || command.type === "stock.cancel") && code === "BT002") return { kind: "done" };
   if (REJECT_CODES.test(code)) return { kind: "reject", code };
   return { kind: "retry" };
 }
@@ -91,6 +106,16 @@ export function retryDelay(attempts: number): number {
 
 /** Transforme une annulation hors délai en demande (motif de l'utilisateur, sinon motif par défaut). */
 export function toCancellationRequest(entry: OutboxEntry, newId: string): OutboxEntry {
+  if (entry.command.type === "stock.cancel") {
+    const { shopId, productId, movementId, reason, fallbackReason } = entry.command;
+    return {
+      ...entry,
+      id: newId,
+      attempts: 0,
+      nextAttemptAt: 0,
+      command: { type: "stock.request", shopId, productId, movementId, reason: reason && reason.trim().length >= 3 ? reason : fallbackReason },
+    };
+  }
   if (entry.command.type !== "cancel") return entry;
   const { customerId, shopId, operationId, reason, fallbackReason } = entry.command;
   return {
@@ -137,7 +162,22 @@ export function mergeOperations(server: readonly LedgerOperation[], outbox: read
   const local: ViewOperation[] = [];
   for (const entry of outbox) {
     const c = entry.command;
-    if (c.type === "customer.create" || c.type === "request" || known.has(entry.id)) continue;
+    // Vente d'un conditionnement entier sur le compte d'un client : une prise (identifiant prévu sur l'appareil).
+    if (c.type === "stock.sell" && c.customerId && c.takeId && !known.has(c.takeId) && (!customerId || c.customerId === customerId)) {
+      local.push({
+        id: c.takeId,
+        kind: "take",
+        amount: c.price,
+        cancelsOperationId: null,
+        authorId: entry.authorId,
+        deviceCreatedAt: entry.deviceCreatedAt,
+        serverCreatedAt: entry.deviceCreatedAt,
+        pending: entry.status === "pending",
+        rejected: entry.status === "rejected",
+      });
+      continue;
+    }
+    if (!isCustomerCommand(c) || c.type === "request" || known.has(entry.id)) continue;
     if (customerId && c.customerId !== customerId) continue;
     const base = {
       id: entry.id,
@@ -193,7 +233,8 @@ export function summarizeByCustomer(operations: readonly (LedgerOperation & { cu
   for (const op of operations) byCustomer.set(op.customerId, [...(byCustomer.get(op.customerId) ?? []), op]);
   for (const entry of outbox) {
     const c = entry.command;
-    if (c.type !== "customer.create" && !byCustomer.has(c.customerId)) byCustomer.set(c.customerId, []);
+    const id = isCustomerCommand(c) ? c.customerId : c.type === "stock.sell" ? c.customerId : null;
+    if (id && !byCustomer.has(id)) byCustomer.set(id, []);
   }
   const result = new Map<string, CustomerSummary>();
   for (const [customerId, ops] of byCustomer) {
@@ -217,8 +258,20 @@ export function summarizeByCustomer(operations: readonly (LedgerOperation & { cu
 }
 
 /** Message à afficher pour un refus du serveur (code d'erreur → clé de traduction « errors.* »). */
-export function rejectionMessage(code: string | undefined): "forbidden" | "customerArchived" | "invalidInput" | "alreadyCancelled" | "requestPending" | "unexpected" {
+export function rejectionMessage(
+  code: string | undefined,
+): "forbidden" | "customerArchived" | "invalidInput" | "alreadyCancelled" | "requestPending" | "alreadyOpened" | "noClosedPackage" | "noOpenedPackage" | "stockChanged" | "estimateRequired" | "unexpected" {
   switch (code) {
+    case "BT010":
+      return "alreadyOpened";
+    case "BT011":
+      return "noClosedPackage";
+    case "BT012":
+      return "noOpenedPackage";
+    case "BT013":
+      return "stockChanged";
+    case "BT014":
+      return "estimateRequired";
     case "42501":
       return "forbidden";
     case "BT003":

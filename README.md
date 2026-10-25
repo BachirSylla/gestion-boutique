@@ -69,6 +69,14 @@ Détails : [docs/decisions/0010](docs/decisions/0010-journal-client.md).
 
 Détails : [docs/decisions/0011](docs/decisions/0011-synchronisation-hors-ligne.md).
 
+## Catalogue et stock (jalon 5)
+
+- **Catalogue** (`/catalog`, propriétaire) : produits, catalogue de départ, grille de prix (détail, conditionnement, formats favoris) avec historique ; changement immédiat ou après écoulement de l'ancien stock.
+- **Prise détaillée** : formats favoris en un toucher, lignes rattachées au sac entamé.
+- **Stock** (`/stock`, hors ligne) : réception, ouvrir / terminer un sac (FIFO), vente de sac entier (comptant ou compte client), reste estimé, bilans de sac, inventaire.
+
+Détails : [0012](docs/decisions/0012-catalogue-et-prix.md), [0013](docs/decisions/0013-stock.md).
+
 ## Organisation
 
 ```

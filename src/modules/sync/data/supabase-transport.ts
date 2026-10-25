@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/shared/supabase/database.types";
 import type { OutboxEntry, RpcErrorLike } from "../domain/sync";
 import type { PullCursors, PullResult, SyncTransport } from "./engine";
-import type { LocalLine, LocalOperation, LocalProduct, LocalRequest, LocalShop } from "./local-db";
+import type { LocalLine, LocalMovement, LocalOperation, LocalProduct, LocalRequest, LocalShop } from "./local-db";
 
 const PAGE = 1000;
 
@@ -61,6 +61,51 @@ export class SupabaseTransport implements SyncTransport {
       case "request":
         result = await this.supabase.rpc("request_cancellation", { p_id: entry.id, p_operation_id: c.operationId, p_reason: c.reason, p_device_created_at: at });
         break;
+      case "stock.receive":
+        result = await this.supabase.rpc("receive_lot", {
+          p_id: entry.id,
+          p_product_id: c.productId,
+          p_count: c.count,
+          p_purchase_price: c.purchasePrice,
+          p_supplier: c.supplier ?? "",
+          p_device_created_at: at,
+        });
+        break;
+      case "stock.open":
+        result = await this.supabase.rpc("open_package", { p_id: entry.id, p_product_id: c.productId, p_device_created_at: at });
+        break;
+      case "stock.finish":
+        result = await this.supabase.rpc("finish_package", { p_id: entry.id, p_product_id: c.productId, p_device_created_at: at });
+        break;
+      case "stock.sell":
+        result = await this.supabase.rpc("sell_whole_package", {
+          p_id: entry.id,
+          p_product_id: c.productId,
+          p_price: c.price,
+          p_customer_id: c.customerId as string,
+          p_take_id: c.takeId as string,
+          p_device_created_at: at,
+        });
+        break;
+      case "stock.estimate":
+        result = await this.supabase.rpc("estimate_remaining", { p_id: entry.id, p_product_id: c.productId, p_estimate: c.estimate, p_device_created_at: at });
+        break;
+      case "stock.adjust":
+        result = await this.supabase.rpc("adjust_stock", {
+          p_id: entry.id,
+          p_product_id: c.productId,
+          p_delta: c.delta,
+          p_reason: c.reason ?? "",
+          p_purchase_price: c.purchasePrice as number,
+          p_device_created_at: at,
+        });
+        break;
+      case "stock.cancel":
+        result = await this.supabase.rpc("cancel_stock_movement", { p_id: entry.id, p_movement_id: c.movementId, p_reason: c.reason ?? "", p_device_created_at: at });
+        break;
+      case "stock.request":
+        result = await this.supabase.rpc("request_stock_cancellation", { p_id: entry.id, p_movement_id: c.movementId, p_reason: c.reason, p_device_created_at: at });
+        break;
     }
     if (!result.error) return null;
     return { code: result.error.code, message: result.error.message, status: result.status };
@@ -74,7 +119,7 @@ export class SupabaseTransport implements SyncTransport {
     let requestsQuery = sb.from("cancellation_requests").select("*").eq("shop_id", shopId);
     if (from.requests) requestsQuery = requestsQuery.or(`created_at.gte.${from.requests},decided_at.gte.${from.requests}`);
 
-    const [customers, operations, requests, settings, methods, profiles, products, prices] = await Promise.all([
+    const [customers, operations, requests, settings, methods, profiles, products, prices, packages, movements, reviews] = await Promise.all([
       customersQuery,
       this.pageOperations(shopId, from.operations),
       requestsQuery,
@@ -83,8 +128,11 @@ export class SupabaseTransport implements SyncTransport {
       sb.from("profiles").select("user_id, full_name"),
       sb.from("products").select("*").eq("shop_id", shopId),
       sb.from("product_prices").select("*").eq("shop_id", shopId),
+      sb.from("packages").select("id, shop_id, product_id, lot_id, state, opened_at, remaining_estimate").eq("shop_id", shopId).in("state", ["closed", "opened"]),
+      sb.from("stock_movements").select("*").eq("shop_id", shopId).order("server_created_at", { ascending: false }).limit(150),
+      sb.from("package_reviews").select("*").eq("shop_id", shopId).order("finished_at", { ascending: false }).limit(60),
     ]);
-    for (const r of [customers, requests, settings, methods, profiles, products, prices]) {
+    for (const r of [customers, requests, settings, methods, profiles, products, prices, packages, movements, reviews]) {
       if (r.error) throw new Error(r.error.message);
     }
 
@@ -105,6 +153,7 @@ export class SupabaseTransport implements SyncTransport {
       id: r.id,
       shopId: r.shop_id,
       operationId: r.operation_id,
+      stockMovementId: r.stock_movement_id,
       status: r.status as LocalRequest["status"],
       reason: r.reason,
       requestedBy: r.requested_by,
@@ -143,6 +192,47 @@ export class SupabaseTransport implements SyncTransport {
           }
         : null,
       profiles: (profiles.data ?? []).map((p) => ({ userId: p.user_id, fullName: p.full_name })),
+      packages: (packages.data ?? []).map((k) => ({
+        id: k.id,
+        shopId: k.shop_id,
+        productId: k.product_id,
+        lotId: k.lot_id,
+        state: k.state as "closed" | "opened",
+        openedAt: k.opened_at,
+        remainingEstimate: k.remaining_estimate,
+      })),
+      movements: (movements.data ?? []).map((m) => ({
+        id: m.id,
+        shopId: m.shop_id,
+        productId: m.product_id,
+        kind: m.kind as LocalMovement["kind"],
+        quantity: m.quantity,
+        amount: m.amount,
+        reason: m.reason,
+        cancelsMovementId: m.cancels_movement_id,
+        customerOperationId: m.customer_operation_id,
+        authorId: m.author_id,
+        deviceCreatedAt: m.device_created_at,
+        serverCreatedAt: m.server_created_at,
+      })),
+      reviews: (reviews.data ?? []).flatMap((r) =>
+        r.package_id && r.shop_id && r.product_id
+          ? [
+              {
+                packageId: r.package_id,
+                shopId: r.shop_id,
+                productId: r.product_id,
+                openedAt: r.opened_at,
+                finishedAt: r.finished_at,
+                expectedRevenue: Number(r.expected_revenue ?? 0),
+                accountTakes: Number(r.account_takes ?? 0),
+                estimatedCashSales: Number(r.estimated_cash_sales ?? 0),
+                cost: Number(r.cost ?? 0),
+                grossMargin: Number(r.gross_margin ?? 0),
+              },
+            ]
+          : [],
+      ),
       products: (products.data ?? []).map((p) => {
         const price = (prices.data ?? []).find((x) => x.product_id === p.id);
         type RawFormat = { id?: string; label: string; quantity_milli: number; price: number };

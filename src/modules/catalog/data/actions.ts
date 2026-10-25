@@ -112,7 +112,10 @@ export async function changePriceAction(_previous: ActionState, form: FormData):
     p_mode: mode,
     p_remaining_estimate: estimate as number,
   });
-  if (error) return failure(errorFromDatabase(error));
+  if (error) {
+    const code = errorFromDatabase(error);
+    return failure(code, code === "estimateRequired" ? { remainingEstimate: code } : undefined);
+  }
   revalidatePath(`/catalog/${productId}`);
   revalidatePath("/catalog");
   return success(null);
