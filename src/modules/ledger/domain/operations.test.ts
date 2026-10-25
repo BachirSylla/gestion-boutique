@@ -75,6 +75,18 @@ describe("buildDetailedTake (RG3)", () => {
     expect(result).toMatchObject({ ok: true, total: 2205 });
   });
 
+  it("ligne format : nombre × prix du format, sans arrondi (riz ½ kg = 160 F)", () => {
+    const result = buildDetailedTake(
+      [
+        { label: "Riz ½ kg", quantity: 1000, unit: "kg", unitPrice: 160, productId: "riz", format: { label: "½ kg", count: 2 } },
+        { label: "Riz", quantity: 250, unit: "kg", unitPrice: 315, productId: "riz" },
+      ],
+      5,
+    );
+    expect(result).toMatchObject({ ok: true, total: 400 });
+    if (result.ok) expect(result.lines.map((l) => l.lineAmount)).toEqual([320, 80]);
+  });
+
   it("signale la ligne fautive", () => {
     expect(buildDetailedTake([{ label: " ", quantity: 1000, unit: "kg", unitPrice: 315 }], 5)).toEqual({ ok: false, index: 0, error: "labelRequired" });
     expect(buildDetailedTake([{ label: "Riz", quantity: 1000, unit: "kg", unitPrice: 315 }, { label: "Sucre", quantity: 0, unit: "kg", unitPrice: 600 }], 5)).toEqual({

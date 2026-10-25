@@ -64,6 +64,23 @@ export interface LocalShop {
   paymentMethods: { id: string; kind: "cash" | "wave" | "orange_money" | "other" | "custom"; label: string | null; active: boolean }[];
 }
 
+export interface LocalProduct {
+  id: string;
+  shopId: string;
+  name: string;
+  category: string | null;
+  packageLabel: string;
+  saleUnit: "kg" | "l" | "piece" | "sachet";
+  capacityMilli: number;
+  reorderThreshold: number;
+  archived: boolean;
+  /** Grille en vigueur (dernier prix connu, utilisé hors ligne : RG3). */
+  retailPrice: Amount | null;
+  packagePrice: Amount | null;
+  formats: { id?: string; label: string; quantityMilli: number; price: Amount }[];
+  pendingRetailPrice: Amount | null;
+}
+
 export interface LocalProfile {
   userId: string;
   fullName: string;
@@ -81,6 +98,7 @@ export class LocalDatabase extends Dexie {
   requests!: Table<LocalRequest, string>;
   shops!: Table<LocalShop, string>;
   profiles!: Table<LocalProfile, string>;
+  products!: Table<LocalProduct, string>;
   outbox!: Table<OutboxEntry, number>;
   meta!: Table<MetaRow, string>;
 
@@ -96,6 +114,8 @@ export class LocalDatabase extends Dexie {
       outbox: "++seq, &id, status",
       meta: "key",
     });
+    // Jalon 5 : catalogue et prix sur l'appareil.
+    this.version(2).stores({ products: "id, shopId" });
   }
 }
 

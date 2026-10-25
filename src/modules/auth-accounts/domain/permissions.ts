@@ -12,11 +12,12 @@ export type Capability =
   | "manageCustomers" // créer, modifier, archiver un client
   | "recordOperations" // prises, versements, annulations, demandes
   | "decideCancellations" // valider / refuser une demande d'annulation
-  | "manageSettings"; // réglages de la boutique
+  | "manageSettings" // réglages de la boutique
+  | "manageCatalog"; // produits, prix et politique de prix
 
 const CAPABILITIES: Record<AccountRole, readonly Capability[]> = {
   platformAdmin: ["managePlatform"],
-  owner: ["manageTeam", "manageShops", "workInShop", "viewCustomers", "manageCustomers", "recordOperations", "decideCancellations", "manageSettings"],
+  owner: ["manageTeam", "manageShops", "workInShop", "viewCustomers", "manageCustomers", "recordOperations", "decideCancellations", "manageSettings", "manageCatalog"],
   manager: ["workInShop", "viewCustomers", "manageCustomers", "recordOperations"],
   accountant: ["workInShop", "viewCustomers"],
 };

@@ -9,6 +9,9 @@ import type { LedgerOperation } from "@/modules/ledger";
 
 export interface TakeLinePayload {
   label: string;
+  product_id?: string | null;
+  format_label?: string | null;
+  format_count?: number | null;
   quantity_milli: number;
   unit: string;
   unit_price: Amount;

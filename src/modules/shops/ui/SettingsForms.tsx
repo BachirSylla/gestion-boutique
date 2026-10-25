@@ -13,6 +13,8 @@ export interface SettingsValues {
   advanceAlertThreshold: number;
   freeCreditReminderDays: number;
   monthlyDueDay: number | null;
+  priceHikePolicy: "immediate" | "after_sellout";
+  priceDropPolicy: "immediate" | "after_sellout";
 }
 
 function useFormFeedback(state: ActionState) {
@@ -66,6 +68,16 @@ export function ShopSettingsForm({ action, shopId, values }: { action: Action; s
         <TextField label={t("monthlyDueDay")} name="monthlyDueDay" inputMode="numeric" defaultValue={values.monthlyDueDay ?? ""} error={field("monthlyDueDay")} />
         <p className="mt-1 text-sm text-gris-texte">{t("monthlyDueDayHint")}</p>
       </div>
+      {(["priceHikePolicy", "priceDropPolicy"] as const).map((name) => (
+        <ChoiceGroup
+          key={name}
+          legend={t(name)}
+          name={name}
+          type="radio"
+          defaultValues={[values[name]]}
+          options={(["after_sellout", "immediate"] as const).map((value) => ({ value, label: t(`policies.${value}`) }))}
+        />
+      ))}
       <SubmitButton variant="primary" pendingLabel={tc("saving")}>
         {t("save")}
       </SubmitButton>

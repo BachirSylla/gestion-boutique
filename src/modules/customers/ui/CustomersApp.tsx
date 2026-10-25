@@ -171,7 +171,16 @@ function TakeScreen({ data, customer, balance, shop, onSaved }: ScreenProps) {
         mode: draft.mode,
         amount: draft.amount,
         note: draft.note,
-        lines: draft.lines.map((l) => ({ label: l.label, quantity_milli: l.quantity, unit: l.unit, unit_price: l.unitPrice, line_amount: l.lineAmount })),
+        lines: draft.lines.map((l) => ({
+          label: l.label,
+          product_id: l.productId ?? null,
+          quantity_milli: l.quantity,
+          unit: l.unit,
+          unit_price: l.unitPrice,
+          line_amount: l.lineAmount,
+          format_label: l.format?.label ?? null,
+          format_count: l.format?.count ?? null,
+        })),
       },
       draft.id,
     );
@@ -180,7 +189,15 @@ function TakeScreen({ data, customer, balance, shop, onSaved }: ScreenProps) {
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader title={t("takeTitle")} intro={customer.fullName} back={{ href: `#/c/${customer.id}`, label: customer.fullName }} action={<CurrentBalance balance={balance} />} />
-      <TakeForm onSave={save} balance={balance} creditLimit={customer.creditLimit} roundingStep={(data.shop?.settings.roundingStep ?? 5) as RoundingStep} />
+      <TakeForm
+        onSave={save}
+        balance={balance}
+        creditLimit={customer.creditLimit}
+        roundingStep={(data.shop?.settings.roundingStep ?? 5) as RoundingStep}
+        products={data.products
+          .filter((p) => !p.archived && p.retailPrice)
+          .map((p) => ({ id: p.id, name: p.name, saleUnit: p.saleUnit, retailPrice: p.retailPrice, formats: p.formats }))}
+      />
     </div>
   );
 }

@@ -16,3 +16,4 @@ On peut changer d'avis : on écrit alors une nouvelle note qui remplace l'ancien
 | [0009](0009-administration-des-comptes.md) | Administration des comptes : fonctions serveur, mots de passe provisoires, désactivation, journal | Acceptée |
 | [0010](0010-journal-client.md) | Clients et journal client : immuabilité, écritures idempotentes, annulations, relances | Acceptée |
 | [0011](0011-synchronisation-hors-ligne.md) | Hors ligne : écran local, file d'envoi idempotente, téléchargement par curseurs, indicateur | Acceptée |
+| [0012](0012-catalogue-et-prix.md) | Catalogue et prix : grille versionnée, politique RG4, formats favoris, catalogue de départ | Acceptée |

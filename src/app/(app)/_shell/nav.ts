@@ -22,6 +22,7 @@ export async function navigation(account: Pick<CurrentAccount, "role">, pendingC
     item("/", "home", t("home")),
     ...(can(role, "viewCustomers") ? [item("/customers", "customers", t("customers")), item("/reminders", "reminders", t("reminders"))] : []),
     ...(can(role, "decideCancellations") ? [item("/cancellations", "cancellations", t("cancellations"), pendingCancellations)] : []),
+    ...(can(role, "manageCatalog") ? [item("/catalog", "catalog", t("catalog"))] : []),
     ...(can(role, "manageTeam") ? [item("/team", "team", t("team"))] : []),
     ...(can(role, "manageShops") ? [item("/shops", "shops", t("shops"))] : []),
     ...(can(role, "manageSettings") ? [item("/settings", "settings", t("settings"))] : []),

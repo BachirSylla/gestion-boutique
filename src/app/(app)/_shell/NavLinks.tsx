@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export type NavIcon = "home" | "admin" | "team" | "shops" | "account" | "customers" | "reminders" | "menu" | "cancellations" | "settings";
+export type NavIcon = "home" | "admin" | "team" | "shops" | "account" | "customers" | "reminders" | "menu" | "cancellations" | "settings" | "catalog";
 
 export interface NavItem {
   href: string;
@@ -83,6 +83,7 @@ const PATHS: Record<NavIcon, string> = {
   customers: "M4 4h12a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2zM18 8h2M18 12h2M18 16h2M8 9h6M8 13h6",
   reminders: "M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0",
   menu: "M4 6h16M4 12h16M4 18h16",
+  catalog: "M20 7 12 3 4 7l8 4 8-4zM4 7v10l8 4M20 7v10l-8 4M12 11v10",
   cancellations: "M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5",
   settings: "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1",
 };

@@ -13,6 +13,8 @@ export interface ShopSettings {
   advanceAlertThreshold: Amount;
   freeCreditReminderDays: number;
   monthlyDueDay: number | null;
+  priceHikePolicy: "immediate" | "after_sellout";
+  priceDropPolicy: "immediate" | "after_sellout";
 }
 
 export interface PaymentMethod {
@@ -46,6 +48,8 @@ export async function getShopContext(shop: { id: string; timezone: string }): Pr
       advanceAlertThreshold: settings.data.advance_alert_threshold,
       freeCreditReminderDays: settings.data.free_credit_reminder_days,
       monthlyDueDay: settings.data.monthly_due_day,
+      priceHikePolicy: settings.data.price_hike_policy as ShopSettings["priceHikePolicy"],
+      priceDropPolicy: settings.data.price_drop_policy as ShopSettings["priceDropPolicy"],
     },
     paymentMethods: (methods.data ?? []).map((m) => ({ id: m.id, kind: m.kind as PaymentMethod["kind"], label: m.label, active: m.active })),
   };

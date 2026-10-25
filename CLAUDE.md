@@ -222,6 +222,7 @@ L'administrateur de la plateforme ne consulte pas le détail des comptes clients
 | **Fin** | Le conditionnement entamé est **terminé** → déclenche le bilan de sac |
 | **Vente de conditionnement entier** | Un conditionnement fermé sort directement, au prix du conditionnement. Au comptant ou sur le compte d'un client (crée alors une prise) |
 | **Ajustement d'inventaire** | Écart entre stock compté et stock théorique, avec auteur et motif |
+| **Annulation** | Un mouvement saisi par erreur s'annule par un mouvement d'annulation, avec les mêmes règles que le journal client : le gérant annule son propre mouvement dans le délai libre, sinon il demande au propriétaire ; le propriétaire annule directement |
 | **Transfert sortant / entrant** | Voir RG5 |
 
 **Stock affiché par produit** : nombre de conditionnements fermés + conditionnement entamé avec reste estimé (plein, ¾, ½, ¼, presque vide) si connu.
@@ -276,7 +277,9 @@ Chaque boutique a deux réglages par défaut :
 
 **Immédiat**
 - Le nouveau prix s'applique dès maintenant, y compris au conditionnement entamé.
-- L'application demande d'**estimer le reste** du conditionnement entamé (plein, ¾, ½, ¼, presque vide) pour découper son chiffre attendu en deux tranches.
+- L'application demande d'**estimer le reste** du conditionnement entamé (plein, ¾, ½, ¼, presque vide) pour découper son chiffre attendu en deux tranches. Valeurs : plein = 100 %, ¾ = 75 %, ½ = 50 %, ¼ = 25 %, **presque vide = 10 %**.
+
+**Grille de prix** : un changement de prix porte sur toute la grille du produit (prix de détail, prix du conditionnement entier et **prix des formats favoris**). L'écran propose des prix de formats recalculés, que le propriétaire ajuste ; toute la grille suit la même politique (immédiate ou après écoulement).
 
 Exemple de test (baisse immédiate) :
 > Sac de riz 50 kg à 330 F/kg. Baisse à 315 F/kg alors qu'il reste ≈ ½ sac.

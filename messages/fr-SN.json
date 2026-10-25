@@ -110,7 +110,8 @@
     "menu": "Menu",
     "cancellations": "Annulations",
     "settings": "Réglages",
-    "sync": "Synchronisation"
+    "sync": "Synchronisation",
+    "catalog": "Catalogue"
   },
   "shell": {
     "currentShop": "Boutique",
@@ -401,7 +402,14 @@
       "takeTitle": "Nouvelle prise : quel client ?",
       "paymentTitle": "Versement : quel client ?"
     },
-    "pendingRequestShort": "Demande d'annulation en attente"
+    "pendingRequestShort": "Demande d'annulation en attente",
+    "favorites": "Favoris",
+    "frequentProducts": "Produits fréquents",
+    "otherItem": "Autre article",
+    "product": "Produit",
+    "formatLine": "{count, number} × {label}",
+    "increase": "Ajouter un {label}",
+    "decrease": "Retirer un {label}"
   },
   "reminders": {
     "title": "À relancer",
@@ -448,7 +456,13 @@
     "addMethod": "Ajouter",
     "newMethodLabel": "Nouveau moyen de paiement",
     "methodAdded": "Moyen ajouté.",
-    "saveMethods": "Enregistrer les moyens"
+    "saveMethods": "Enregistrer les moyens",
+    "priceHikePolicy": "Hausse de prix, par défaut",
+    "priceDropPolicy": "Baisse de prix, par défaut",
+    "policies": {
+      "after_sellout": "Après écoulement de l'ancien stock",
+      "immediate": "Tout de suite"
+    }
   },
   "menu": {
     "title": "Menu"
@@ -482,5 +496,79 @@
     "firstSyncNeeded": "Première utilisation sur cet appareil : connectez-vous au réseau le temps de télécharger les données de la boutique.",
     "lateCancellationReason": "Annulation saisie hors ligne, arrivée après le délai d'annulation libre.",
     "signOutPending": "{count, plural, one {# saisie n'a pas encore été envoyée et sera perdue.} other {# saisies n'ont pas encore été envoyées et seront perdues.}} Se déconnecter quand même ?"
+  },
+  "catalog": {
+    "title": "Catalogue",
+    "intro": "Produits et prix de {shop}.",
+    "new": "Nouveau produit",
+    "empty": "Aucun produit pour l'instant.",
+    "starterHint": "Ajoutez le catalogue de départ (riz, huile, sucre, lait, oignon…) puis adaptez les prix et contenances à votre boutique.",
+    "addStarter": "Ajouter le catalogue de départ",
+    "defaultPackage": "sac",
+    "packaging": "{label} de {capacity} {unit}",
+    "pricePerUnit": "{price} / {unit}",
+    "packagePriceShort": "Conditionnement {price}",
+    "pendingBadge": "Prix en attente",
+    "pendingNotice": "Hausse en attente : {price} / {unit} au prochain arrivage. L'ancien prix s'applique jusqu'à l'ouverture du premier conditionnement reçu après le changement.",
+    "cancelPending": "Annuler le prix en attente",
+    "changePriceTitle": "Changer le prix",
+    "changePrice": "Enregistrer le nouveau prix",
+    "priceChanged": "Prix enregistré.",
+    "history": "Historique des prix",
+    "info": "Informations",
+    "archive": "Archiver le produit",
+    "unarchive": "Désarchiver",
+    "archived": "Archivé",
+    "archiveConfirm": "Le produit ne sera plus proposé. Son historique est conservé. Confirmer ?",
+    "create": "Créer le produit",
+    "createdOn": "créé le {date}",
+    "units": {
+      "kg": "kg",
+      "l": "L",
+      "piece": "pièce",
+      "sachet": "sachet"
+    },
+    "fields": {
+      "name": "Nom du produit",
+      "category": "Catégorie",
+      "packageLabel": "Conditionnement (sac, bidon, carton…)",
+      "saleUnit": "Unité de vente",
+      "capacity": "Contenance du conditionnement ({unit})",
+      "capacityHint": "Exemple : 50 pour un sac de 50 kg. Ne pourra plus être modifiée (les bilans en dépendent).",
+      "retailPrice": "Prix de détail par {unit}",
+      "packagePrice": "Prix du conditionnement entier",
+      "reorderThreshold": "Racheter quand il reste (conditionnements fermés)"
+    },
+    "formats": {
+      "title": "Formats favoris",
+      "hint": "Les formats vendus souvent, avec leur propre prix (riz ½ kg à 160 F). Ils apparaissent en boutons dans la prise.",
+      "label": "Format",
+      "quantity": "Quantité ({unit})",
+      "price": "Prix",
+      "add": "Ajouter un format",
+      "remove": "Retirer le format {index, number}"
+    },
+    "direction": {
+      "hike": "Hausse : {old} → {new}",
+      "drop": "Baisse : {old} → {new}"
+    },
+    "policy": {
+      "title": "Quand appliquer ce prix ?",
+      "immediate": "Tout de suite",
+      "immediateHint": "Le nouveau prix s'applique dès maintenant, y compris au conditionnement entamé.",
+      "after_sellout": "Après écoulement de l'ancien stock",
+      "after_selloutHint": "L'ancien prix reste jusqu'à l'ouverture du premier conditionnement reçu après ce changement."
+    },
+    "status": {
+      "active": "En vigueur",
+      "pending": "En attente",
+      "superseded": "Remplacé",
+      "cancelled": "Annulé"
+    },
+    "mode": {
+      "initial": "Prix de départ",
+      "immediate": "Appliqué tout de suite",
+      "after_sellout": "Après écoulement"
+    }
   }
 }

@@ -1,6 +1,6 @@
 // Moteur de synchronisation : file d'envoi idempotente (dans l'ordre) + téléchargement incrémental.
 import { advanceCursor, classifyOutcome, pullFrom, retryDelay, toCancellationRequest, type OutboxCommand, type OutboxEntry, type RpcErrorLike } from "../domain/sync";
-import type { LocalCustomer, LocalDatabase, LocalLine, LocalOperation, LocalProfile, LocalRequest, LocalShop } from "./local-db";
+import type { LocalCustomer, LocalDatabase, LocalLine, LocalOperation, LocalProduct, LocalProfile, LocalRequest, LocalShop } from "./local-db";
 
 export interface PullCursors {
   customers: string | null;
@@ -15,6 +15,8 @@ export interface PullResult {
   requests: LocalRequest[];
   shop: LocalShop | null;
   profiles: LocalProfile[];
+  /** Catalogue complet de la boutique (petit : téléchargé à chaque passage). */
+  products?: LocalProduct[];
   /** Horodatages serveur vus, pour avancer les curseurs. */
   seen: { customers: string[]; operations: string[]; requests: string[] };
 }
@@ -243,7 +245,7 @@ export class SyncEngine {
         operations: pullFrom(cursors.operations),
         requests: pullFrom(cursors.requests),
       });
-      await this.db.transaction("rw", [this.db.customers, this.db.operations, this.db.lines, this.db.requests, this.db.shops, this.db.profiles, this.db.meta], async () => {
+      await this.db.transaction("rw", [this.db.customers, this.db.operations, this.db.lines, this.db.requests, this.db.shops, this.db.profiles, this.db.products, this.db.meta], async () => {
         await this.db.customers.bulkPut(result.customers);
         await this.db.operations.bulkPut(result.operations.map((op) => ({ ...op, provisional: false })));
         // Lignes provisoires (identifiant local) remplacées par celles du serveur.
@@ -253,6 +255,10 @@ export class SyncEngine {
         await this.db.requests.bulkPut(result.requests);
         if (result.shop) await this.db.shops.put(result.shop);
         await this.db.profiles.bulkPut(result.profiles);
+        if (result.products) {
+          await this.db.products.where("shopId").equals(shopId).delete();
+          await this.db.products.bulkPut(result.products);
+        }
         await this.db.meta.bulkPut([
           { key: `cursor:${shopId}:customers`, value: advanceCursor(cursors.customers, result.seen.customers) },
           { key: `cursor:${shopId}:operations`, value: advanceCursor(cursors.operations, result.seen.operations) },
@@ -271,7 +277,8 @@ export class SyncEngine {
   /** Oublie les données des boutiques qui ne sont plus accessibles (rattachement retiré). */
   async forgetOtherShops(): Promise<void> {
     const keep = new Set(this.options.shopIds);
-    await this.db.transaction("rw", [this.db.customers, this.db.operations, this.db.requests, this.db.shops], async () => {
+    await this.db.transaction("rw", [this.db.customers, this.db.operations, this.db.requests, this.db.shops, this.db.products], async () => {
+      await this.db.products.filter((p) => !keep.has(p.shopId)).delete();
       await this.db.customers.filter((c) => !keep.has(c.shopId)).delete();
       await this.db.operations.filter((o) => !keep.has(o.shopId)).delete();
       await this.db.requests.filter((r) => !keep.has(r.shopId)).delete();

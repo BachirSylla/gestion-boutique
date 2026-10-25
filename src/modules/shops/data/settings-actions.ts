@@ -24,6 +24,7 @@ export async function saveShopSettingsAction(_previous: ActionState, form: FormD
   const freeDays = integer(form, "freeCreditReminderDays");
   const dueRaw = text(form, "monthlyDueDay", 4);
   const dueDay = dueRaw ? integer(form, "monthlyDueDay") : null;
+  const policy = (name: string) => (text(form, name) === "immediate" ? "immediate" : "after_sellout");
 
   const fields = {
     ...(cancelWindow !== null && cancelWindow <= 60 ? {} : { cancelWindowMinutes: "invalidInput" as const }),
@@ -43,6 +44,8 @@ export async function saveShopSettingsAction(_previous: ActionState, form: FormD
       advance_alert_threshold: threshold!,
       free_credit_reminder_days: freeDays!,
       monthly_due_day: dueDay,
+      price_hike_policy: policy("priceHikePolicy"),
+      price_drop_policy: policy("priceDropPolicy"),
     })
     .eq("shop_id", shopId)
     .select("shop_id");

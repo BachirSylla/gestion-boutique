@@ -320,6 +320,119 @@ export type Database = {
         }
         Relationships: []
       }
+      price_versions: {
+        Row: {
+          activated_at: string | null
+          created_at: string
+          created_by: string | null
+          ended_at: string | null
+          formats: Json
+          id: string
+          mode: string
+          package_price: number | null
+          product_id: string
+          retail_price: number
+          shop_id: string
+          status: string
+        }
+        Insert: {
+          activated_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          formats?: Json
+          id?: string
+          mode: string
+          package_price?: number | null
+          product_id: string
+          retail_price: number
+          shop_id: string
+          status: string
+        }
+        Update: {
+          activated_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          formats?: Json
+          id?: string
+          mode?: string
+          package_price?: number | null
+          product_id?: string
+          retail_price?: number
+          shop_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_versions_product_id_shop_id_fkey"
+            columns: ["product_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "product_prices"
+            referencedColumns: ["product_id", "shop_id"]
+          },
+          {
+            foreignKeyName: "price_versions_product_id_shop_id_fkey"
+            columns: ["product_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id", "shop_id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          archived_at: string | null
+          capacity_milli: number
+          category: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          package_label: string
+          reorder_threshold: number
+          sale_unit: string
+          shop_id: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          capacity_milli: number
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          id: string
+          name: string
+          package_label: string
+          reorder_threshold?: number
+          sale_unit: string
+          shop_id: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          capacity_milli?: number
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          package_label?: string
+          reorder_threshold?: number
+          sale_unit?: string
+          shop_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_contacts: {
         Row: {
           phone_e164: string
@@ -447,6 +560,8 @@ export type Database = {
           cancel_window_minutes: number
           free_credit_reminder_days: number
           monthly_due_day: number | null
+          price_drop_policy: string
+          price_hike_policy: string
           rounding_step: number
           shop_id: string
           updated_at: string
@@ -457,6 +572,8 @@ export type Database = {
           cancel_window_minutes?: number
           free_credit_reminder_days?: number
           monthly_due_day?: number | null
+          price_drop_policy?: string
+          price_hike_policy?: string
           rounding_step?: number
           shop_id: string
           updated_at?: string
@@ -467,6 +584,8 @@ export type Database = {
           cancel_window_minutes?: number
           free_credit_reminder_days?: number
           monthly_due_day?: number | null
+          price_drop_policy?: string
+          price_hike_policy?: string
           rounding_step?: number
           shop_id?: string
           updated_at?: string
@@ -538,8 +657,49 @@ export type Database = {
           },
         ]
       }
+      starter_products: {
+        Row: {
+          capacity_milli: number
+          category: string | null
+          formats: Json
+          id: number
+          name: string
+          package_label: string
+          package_price: number | null
+          position: number
+          retail_price: number
+          sale_unit: string
+        }
+        Insert: {
+          capacity_milli: number
+          category?: string | null
+          formats?: Json
+          id?: never
+          name: string
+          package_label: string
+          package_price?: number | null
+          position: number
+          retail_price: number
+          sale_unit: string
+        }
+        Update: {
+          capacity_milli?: number
+          category?: string | null
+          formats?: Json
+          id?: never
+          name?: string
+          package_label?: string
+          package_price?: number | null
+          position?: number
+          retail_price?: number
+          sale_unit?: string
+        }
+        Relationships: []
+      }
       take_lines: {
         Row: {
+          format_count: number | null
+          format_label: string | null
           id: string
           label: string
           line_amount: number
@@ -553,6 +713,8 @@ export type Database = {
           unit_price: number
         }
         Insert: {
+          format_count?: number | null
+          format_label?: string | null
           id?: string
           label: string
           line_amount: number
@@ -566,6 +728,8 @@ export type Database = {
           unit_price: number
         }
         Update: {
+          format_count?: number | null
+          format_label?: string | null
           id?: string
           label?: string
           line_amount?: number
@@ -584,6 +748,20 @@ export type Database = {
             columns: ["operation_id", "shop_id"]
             isOneToOne: false
             referencedRelation: "customer_operations"
+            referencedColumns: ["id", "shop_id"]
+          },
+          {
+            foreignKeyName: "take_lines_product_fk"
+            columns: ["product_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "product_prices"
+            referencedColumns: ["product_id", "shop_id"]
+          },
+          {
+            foreignKeyName: "take_lines_product_fk"
+            columns: ["product_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id", "shop_id"]
           },
         ]
@@ -647,14 +825,71 @@ export type Database = {
           },
         ]
       }
+      product_prices: {
+        Row: {
+          activated_at: string | null
+          active_version_id: string | null
+          formats: Json | null
+          package_price: number | null
+          pending_formats: Json | null
+          pending_package_price: number | null
+          pending_retail_price: number | null
+          pending_since: string | null
+          pending_version_id: string | null
+          product_id: string | null
+          retail_price: number | null
+          shop_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      add_starter_catalog: { Args: { p_shop_id: string }; Returns: number }
       cancel_operation: {
         Args: {
           p_device_created_at: string
           p_id: string
           p_operation_id: string
           p_reason: string
+        }
+        Returns: Json
+      }
+      cancel_pending_price: {
+        Args: { p_product_id: string }
+        Returns: undefined
+      }
+      change_price: {
+        Args: {
+          p_formats: Json
+          p_mode: string
+          p_package_price: number
+          p_product_id: string
+          p_remaining_estimate?: number
+          p_retail_price: number
+        }
+        Returns: Json
+      }
+      create_product: {
+        Args: {
+          p_capacity_milli: number
+          p_category: string
+          p_formats: Json
+          p_id: string
+          p_name: string
+          p_package_label: string
+          p_package_price: number
+          p_reorder_threshold: number
+          p_retail_price: number
+          p_sale_unit: string
+          p_shop_id: string
         }
         Returns: Json
       }

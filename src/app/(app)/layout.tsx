@@ -28,7 +28,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const shell = (
     <div className="min-h-dvh lg:pl-68">
       {/* Ordinateur : menu latéral */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-68 flex-col gap-6 bg-vert-principal px-4 py-6 text-white lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-68 flex-col gap-6 overflow-y-auto bg-vert-principal px-4 py-6 text-white lg:flex">
         <div className="flex items-center gap-3 px-2">
           <LogoMark size={36} />
           <span className="text-xl font-extrabold">{t("app.name")}</span>

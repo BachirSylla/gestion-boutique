@@ -52,9 +52,14 @@ export type SaleUnit = (typeof SALE_UNITS)[number];
 
 export interface TakeLineInput {
   label: string;
+  /** Quantité en millièmes d'unité de vente (pour un format : quantité totale, nombre × quantité du format). */
   quantity: Quantity;
   unit: SaleUnit;
+  /** Prix unitaire figé : par unité de vente, ou prix du format. */
   unitPrice: Amount;
+  productId?: string | null;
+  /** Ligne « format » (½ kg à 160 F…) : montant = nombre × prix du format, sans arrondi (RG3). */
+  format?: { label: string; count: number } | null;
 }
 
 export interface TakeLine extends TakeLineInput {
@@ -73,7 +78,8 @@ export function buildDetailedTake(
     if (!input.label.trim()) return { ok: false, index, error: "labelRequired" };
     if (!Number.isSafeInteger(input.quantity) || input.quantity <= 0) return { ok: false, index, error: "quantityInvalid" };
     if (!Number.isSafeInteger(input.unitPrice) || input.unitPrice <= 0) return { ok: false, index, error: "priceInvalid" };
-    const amount = lineAmount(input.quantity, input.unitPrice, step);
+    if (input.format && (!Number.isSafeInteger(input.format.count) || input.format.count <= 0)) return { ok: false, index, error: "quantityInvalid" };
+    const amount = input.format ? input.format.count * input.unitPrice : lineAmount(input.quantity, input.unitPrice, step);
     if (amount <= 0) return { ok: false, index, error: "amountZero" };
     lines.push({ ...input, label: input.label.trim(), lineAmount: amount });
   }

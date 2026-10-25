@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/shared/supabase/database.types";
 import type { OutboxEntry, RpcErrorLike } from "../domain/sync";
 import type { PullCursors, PullResult, SyncTransport } from "./engine";
-import type { LocalLine, LocalOperation, LocalRequest, LocalShop } from "./local-db";
+import type { LocalLine, LocalOperation, LocalProduct, LocalRequest, LocalShop } from "./local-db";
 
 const PAGE = 1000;
 
@@ -74,15 +74,17 @@ export class SupabaseTransport implements SyncTransport {
     let requestsQuery = sb.from("cancellation_requests").select("*").eq("shop_id", shopId);
     if (from.requests) requestsQuery = requestsQuery.or(`created_at.gte.${from.requests},decided_at.gte.${from.requests}`);
 
-    const [customers, operations, requests, settings, methods, profiles] = await Promise.all([
+    const [customers, operations, requests, settings, methods, profiles, products, prices] = await Promise.all([
       customersQuery,
       this.pageOperations(shopId, from.operations),
       requestsQuery,
       sb.from("shop_settings").select("*").eq("shop_id", shopId).maybeSingle(),
       sb.from("payment_methods").select("id, kind, label, active").eq("shop_id", shopId).order("position").order("created_at"),
       sb.from("profiles").select("user_id, full_name"),
+      sb.from("products").select("*").eq("shop_id", shopId),
+      sb.from("product_prices").select("*").eq("shop_id", shopId),
     ]);
-    for (const r of [customers, requests, settings, methods, profiles]) {
+    for (const r of [customers, requests, settings, methods, profiles, products, prices]) {
       if (r.error) throw new Error(r.error.message);
     }
 
@@ -141,6 +143,25 @@ export class SupabaseTransport implements SyncTransport {
           }
         : null,
       profiles: (profiles.data ?? []).map((p) => ({ userId: p.user_id, fullName: p.full_name })),
+      products: (products.data ?? []).map((p) => {
+        const price = (prices.data ?? []).find((x) => x.product_id === p.id);
+        type RawFormat = { id?: string; label: string; quantity_milli: number; price: number };
+        return {
+          id: p.id,
+          shopId: p.shop_id,
+          name: p.name,
+          category: p.category,
+          packageLabel: p.package_label,
+          saleUnit: p.sale_unit as LocalProduct["saleUnit"],
+          capacityMilli: p.capacity_milli,
+          reorderThreshold: p.reorder_threshold,
+          archived: !!p.archived_at,
+          retailPrice: price?.retail_price ?? null,
+          packagePrice: price?.package_price ?? null,
+          formats: ((price?.formats as RawFormat[] | null) ?? []).map((f) => ({ id: f.id, label: f.label, quantityMilli: Number(f.quantity_milli), price: Number(f.price) })),
+          pendingRetailPrice: price?.pending_retail_price ?? null,
+        };
+      }),
       seen: {
         customers: (customers.data ?? []).map((c) => c.updated_at),
         operations: operations.map((o) => o.serverCreatedAt),

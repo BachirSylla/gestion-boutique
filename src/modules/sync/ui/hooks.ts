@@ -1,7 +1,7 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import type { LocalCustomer, LocalLine, LocalOperation, LocalProfile, LocalRequest, LocalShop } from "../data/local-db";
+import type { LocalCustomer, LocalLine, LocalOperation, LocalProduct, LocalProfile, LocalRequest, LocalShop } from "../data/local-db";
 import type { OutboxEntry } from "../domain/sync";
 import { useOptionalSync } from "./SyncProvider";
 
@@ -12,6 +12,7 @@ export interface LocalShopData {
   shop: LocalShop | undefined;
   profiles: Map<string, string>;
   requests: LocalRequest[];
+  products: LocalProduct[];
   /** Le premier téléchargement n'a jamais eu lieu sur cet appareil. */
   neverSynced: boolean;
 }
@@ -22,13 +23,14 @@ export function useLocalShop(shopId: string): LocalShopData | undefined {
   const db = useOptionalSync()?.engine.db;
   return useLiveQuery(async () => {
     if (!db) return undefined;
-    const [customers, operations, outbox, shop, profiles, requests, cursor] = await Promise.all([
+    const [customers, operations, outbox, shop, profiles, requests, products, cursor] = await Promise.all([
       db.customers.where("shopId").equals(shopId).toArray(),
       db.operations.where("shopId").equals(shopId).toArray(),
       db.outbox.orderBy("seq").toArray(),
       db.shops.get(shopId),
       db.profiles.toArray(),
       db.requests.where("shopId").equals(shopId).toArray(),
+      db.products.where("shopId").equals(shopId).sortBy("name"),
       db.meta.get(`cursor:${shopId}:customers`),
     ]);
     return {
@@ -38,6 +40,7 @@ export function useLocalShop(shopId: string): LocalShopData | undefined {
       shop,
       profiles: new Map(profiles.map((p: LocalProfile) => [p.userId, p.fullName])),
       requests,
+      products,
       neverSynced: !shop && !cursor,
     };
   }, [db, shopId]);

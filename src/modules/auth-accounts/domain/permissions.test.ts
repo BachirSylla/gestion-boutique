@@ -33,6 +33,8 @@ describe("can (matrice CLAUDE.md §4.2, jalon 2)", () => {
     expect(can("owner", "decideCancellations")).toBe(true);
     expect(can("owner", "manageSettings")).toBe(true);
     expect(can("platformAdmin", "viewCustomers")).toBe(false);
+    expect(can("owner", "manageCatalog")).toBe(true);
+    expect(can("manager", "manageCatalog")).toBe(false);
   });
 
   it("sans rôle, aucune capacité", () => {

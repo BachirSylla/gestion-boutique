@@ -39,7 +39,7 @@ describe("droits d'exécution", () => {
   it("toute fonction de public exécutable par authenticated est explicitement autorisée", () =>
     scenario(async (ctx) => {
       // Écritures du journal client (jalon 3) : contrôlent elles-mêmes les droits avec auth.uid().
-      const allowed = ["cancel_operation", "decide_cancellation", "record_payment", "record_take", "request_cancellation"];
+      const allowed = ["add_starter_catalog", "cancel_operation", "cancel_pending_price", "change_price", "create_product", "decide_cancellation", "record_payment", "record_take", "request_cancellation"];
       const rows = await ctx.rows<{ name: string }>(
         `select p.proname as name from pg_proc p join pg_namespace n on n.oid = p.pronamespace
          where n.nspname = 'public' and has_function_privilege('authenticated', p.oid, 'execute') order by 1`,
