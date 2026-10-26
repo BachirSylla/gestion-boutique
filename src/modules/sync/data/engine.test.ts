@@ -2,7 +2,7 @@ import "fake-indexeddb/auto";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { OutboxCommand, OutboxEntry, RpcErrorLike } from "../domain/sync";
 import { SyncEngine, type PullResult, type SyncTransport } from "./engine";
-import { LocalDatabase, type LocalOperation } from "./local-db";
+import { LocalDatabase, type LocalClosing, type LocalOperation } from "./local-db";
 
 const take = (amount: number): OutboxCommand => ({ type: "take", customerId: "awa", shopId: "s1", mode: "quick", amount, note: null, lines: [] });
 
@@ -12,6 +12,7 @@ const take = (amount: number): OutboxCommand => ({ type: "take", customerId: "aw
  */
 class FakeServer implements SyncTransport {
   operations = new Map<string, LocalOperation>();
+  closings = new Map<string, LocalClosing>();
   sends: string[] = [];
   failNext: "network" | "lostResponse" | RpcErrorLike | null = null;
   rejectCodes = new Map<string, string>(); // id → code d'erreur métier
@@ -42,12 +43,16 @@ class FakeServer implements SyncTransport {
         cancellationReason: null,
       });
     }
+    if (c.type === "cash.close" && !this.closings.has(entry.id)) {
+      const totalReceived = c.amounts.reduce((sum, a) => sum + a.amount, 0);
+      this.closings.set(entry.id, { id: entry.id, shopId: c.shopId, businessDate: c.businessDate, totalReceived, amounts: c.amounts, note: c.note, authorId: entry.authorId, deviceCreatedAt: entry.deviceCreatedAt, serverCreatedAt: new Date().toISOString() });
+    }
     return failure === "lostResponse" ? { message: "Network request failed" } : null;
   }
 
   async pullShop(): Promise<PullResult> {
     const operations = [...this.operations.values()];
-    return { customers: [], operations, lines: [], requests: [], shop: null, profiles: [], seen: { customers: [], operations: operations.map((o) => o.serverCreatedAt), requests: [] } };
+    return { customers: [], operations, lines: [], requests: [], shop: null, profiles: [], closings: [...this.closings.values()], seen: { customers: [], operations: operations.map((o) => o.serverCreatedAt), requests: [] } };
   }
 }
 
@@ -149,5 +154,33 @@ describe("SyncEngine", () => {
     const customer = { id: "c-new", shopId: "s1", fullName: "Cheikh Diop", phone: null, type: "free" as const, creditLimit: null, alertThreshold: null, monthlyDueDay: null, note: null };
     await engine.enqueue({ type: "customer.create", customer }, "c-new");
     expect(await db.customers.get("c-new")).toMatchObject({ fullName: "Cheikh Diop", localOnly: true });
+  });
+});
+
+describe("clôture de journée hors ligne (RG7)", () => {
+  it("saisie sans réseau, réponse perdue au premier envoi : une seule clôture, visible tout du long", async () => {
+    online = false;
+    const command: OutboxCommand = {
+      type: "cash.close",
+      shopId: "s1",
+      businessDate: "2026-10-25",
+      amounts: [
+        { paymentMethodId: "cash", amount: 40_000 },
+        { paymentMethodId: "wave", amount: 15_000 },
+      ],
+      note: null,
+    };
+    await engine.enqueue(command);
+    expect(await db.outbox.count()).toBe(1);
+    online = true;
+    server.failNext = "lostResponse";
+    await engine.sync();
+    clock += 60 * 60_000;
+    await engine.sync();
+    expect(server.closings.size).toBe(1);
+    expect(await db.outbox.count()).toBe(0);
+    const local = await db.closings.toArray();
+    expect(local).toHaveLength(1);
+    expect(local[0]).toMatchObject({ businessDate: "2026-10-25", totalReceived: 55_000 });
   });
 });

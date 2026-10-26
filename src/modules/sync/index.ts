@@ -14,7 +14,7 @@ export {
   type TakeLinePayload,
   type ViewOperation,
 } from "./domain/sync";
-export type { LocalCustomer, LocalLine, LocalMovement, LocalOperation, LocalPackage, LocalProduct, LocalRequest, LocalReview, LocalShop } from "./data/local-db";
+export type { LocalClosing, LocalCustomer, LocalLine, LocalMovement, LocalOperation, LocalPackage, LocalProduct, LocalRequest, LocalReview, LocalShop } from "./data/local-db";
 export { SyncProvider, useOptionalSync, useSync, useSyncStatus, clearLocalData } from "./ui/SyncProvider";
 export { SyncIndicator } from "./ui/SyncIndicator";
 export { SignOutButton } from "./ui/SignOutButton";

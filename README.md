@@ -86,6 +86,14 @@ Détails : [0012](docs/decisions/0012-catalogue-et-prix.md), [0013](docs/decisio
 
 Détails : [0014](docs/decisions/0014-documents.md).
 
+## Caisse et tableau de bord (jalon 7)
+
+- **Caisse** (`/cash`, hors ligne) : ventes du jour et clôture du soir. On saisit tout l'argent reçu par moyen de paiement ; l'application en déduit les ventes au comptant au détail (versements et sacs entiers retirés). Une nouvelle clôture du même jour corrige la précédente.
+- **Bénéfices** (`/profits`, propriétaire et comptable) : bénéfice brut par période et par produit, à côté de l'argent encaissé ; comptant attendu des sacs et comptant déclaré côte à côte.
+- **Accueil** : ventes du jour, bénéfice brut du mois, stock à surveiller, dernières opérations.
+
+Détails : [0015](docs/decisions/0015-caisse-et-tableau-de-bord.md).
+
 ## Organisation
 
 ```

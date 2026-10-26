@@ -4,9 +4,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/shared/supabase/database.types";
 import type { OutboxEntry, RpcErrorLike } from "../domain/sync";
 import type { PullCursors, PullResult, SyncTransport } from "./engine";
-import type { LocalLine, LocalMovement, LocalOperation, LocalProduct, LocalRequest, LocalShop } from "./local-db";
+import type { LocalClosing, LocalLine, LocalMovement, LocalOperation, LocalProduct, LocalRequest, LocalShop } from "./local-db";
 
 const PAGE = 1000;
+/** Fenêtre gardée sur l'appareil pour les ventes du jour et les clôtures. */
+const RECENT_DAYS = 62;
 
 export class SupabaseTransport implements SyncTransport {
   constructor(private readonly supabase: SupabaseClient<Database>) {}
@@ -106,6 +108,16 @@ export class SupabaseTransport implements SyncTransport {
       case "stock.request":
         result = await this.supabase.rpc("request_stock_cancellation", { p_id: entry.id, p_movement_id: c.movementId, p_reason: c.reason, p_device_created_at: at });
         break;
+      case "cash.close":
+        result = await this.supabase.rpc("record_day_closing", {
+          p_id: entry.id,
+          p_shop_id: c.shopId,
+          p_business_date: c.businessDate,
+          p_amounts: c.amounts.map((a) => ({ payment_method_id: a.paymentMethodId, amount: a.amount })),
+          p_note: c.note ?? "",
+          p_device_created_at: at,
+        });
+        break;
     }
     if (!result.error) return null;
     return { code: result.error.code, message: result.error.message, status: result.status };
@@ -119,7 +131,9 @@ export class SupabaseTransport implements SyncTransport {
     let requestsQuery = sb.from("cancellation_requests").select("*").eq("shop_id", shopId);
     if (from.requests) requestsQuery = requestsQuery.or(`created_at.gte.${from.requests},decided_at.gte.${from.requests}`);
 
-    const [customers, operations, requests, settings, methods, profiles, products, prices, packages, movements, reviews] = await Promise.all([
+    // Ventes du jour et clôtures : les ventes de sacs entiers et les clôtures des dernières semaines restent sur l'appareil.
+    const since = new Date(Date.now() - RECENT_DAYS * 86_400_000).toISOString();
+    const [customers, operations, requests, settings, methods, profiles, products, prices, packages, movements, reviews, wholeSales, closings] = await Promise.all([
       customersQuery,
       this.pageOperations(shopId, from.operations),
       requestsQuery,
@@ -131,8 +145,15 @@ export class SupabaseTransport implements SyncTransport {
       sb.from("packages").select("id, shop_id, product_id, lot_id, state, opened_at, remaining_estimate").eq("shop_id", shopId).in("state", ["closed", "opened"]),
       sb.from("stock_movements").select("*").eq("shop_id", shopId).order("server_created_at", { ascending: false }).limit(150),
       sb.from("package_reviews").select("*").eq("shop_id", shopId).order("finished_at", { ascending: false }).limit(60),
+      sb.from("stock_movements").select("*").eq("shop_id", shopId).in("kind", ["whole_sale", "cancellation"]).gte("device_created_at", since).limit(PAGE),
+      sb
+        .from("day_closings")
+        .select("*, day_closing_amounts(payment_method_id, amount)")
+        .eq("shop_id", shopId)
+        .gte("business_date", since.slice(0, 10))
+        .limit(PAGE),
     ]);
-    for (const r of [customers, requests, settings, methods, profiles, products, prices, packages, movements, reviews]) {
+    for (const r of [customers, requests, settings, methods, profiles, products, prices, packages, movements, reviews, wholeSales, closings]) {
       if (r.error) throw new Error(r.error.message);
     }
 
@@ -212,7 +233,7 @@ export class SupabaseTransport implements SyncTransport {
         openedAt: k.opened_at,
         remainingEstimate: k.remaining_estimate,
       })),
-      movements: (movements.data ?? []).map((m) => ({
+      movements: [...new Map([...(wholeSales.data ?? []), ...(movements.data ?? [])].map((m) => [m.id, m])).values()].map((m) => ({
         id: m.id,
         shopId: m.shop_id,
         productId: m.product_id,
@@ -226,6 +247,19 @@ export class SupabaseTransport implements SyncTransport {
         deviceCreatedAt: m.device_created_at,
         serverCreatedAt: m.server_created_at,
       })),
+      closings: (closings.data ?? []).map(
+        (k): LocalClosing => ({
+          id: k.id,
+          shopId: k.shop_id,
+          businessDate: k.business_date,
+          totalReceived: k.total_received,
+          amounts: (k.day_closing_amounts ?? []).map((a) => ({ paymentMethodId: a.payment_method_id, amount: a.amount })),
+          note: k.note,
+          authorId: k.author_id,
+          deviceCreatedAt: k.device_created_at,
+          serverCreatedAt: k.server_created_at,
+        }),
+      ),
       reviews: (reviews.data ?? []).flatMap((r) =>
         r.package_id && r.shop_id && r.product_id
           ? [

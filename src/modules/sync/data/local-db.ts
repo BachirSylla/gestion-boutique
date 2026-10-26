@@ -123,6 +123,19 @@ export interface LocalReview {
   grossMargin: Amount;
 }
 
+/** Clôture de journée (RG7) : journal, la dernière reçue du jour fait foi. */
+export interface LocalClosing {
+  id: string;
+  shopId: string;
+  businessDate: string;
+  totalReceived: Amount;
+  amounts: { paymentMethodId: string; amount: Amount }[];
+  note: string | null;
+  authorId: string;
+  deviceCreatedAt: string;
+  serverCreatedAt: string;
+}
+
 export interface LocalProfile {
   userId: string;
   fullName: string;
@@ -144,6 +157,7 @@ export class LocalDatabase extends Dexie {
   packages!: Table<LocalPackage, string>;
   movements!: Table<LocalMovement, string>;
   reviews!: Table<LocalReview, string>;
+  closings!: Table<LocalClosing, string>;
   outbox!: Table<OutboxEntry, number>;
   meta!: Table<MetaRow, string>;
 
@@ -163,6 +177,8 @@ export class LocalDatabase extends Dexie {
     this.version(2).stores({ products: "id, shopId" });
     // Jalon 5b : stock courant, derniers mouvements et bilans de sac.
     this.version(3).stores({ packages: "id, shopId, productId", movements: "id, shopId, productId", reviews: "packageId, shopId, productId" });
+    // Jalon 7 : clôtures de journée des dernières semaines.
+    this.version(4).stores({ closings: "id, shopId" });
   }
 }
 

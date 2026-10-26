@@ -117,7 +117,9 @@
     "settings": "Réglages",
     "sync": "Synchronisation",
     "catalog": "Catalogue",
-    "stock": "Stock"
+    "stock": "Stock",
+    "cash": "Caisse",
+    "profits": "Bénéfices"
   },
   "shell": {
     "currentShop": "Boutique",
@@ -139,8 +141,7 @@
     "newPayment": "Versement",
     "remindersTitle": "À relancer",
     "seeAll": "Tout voir",
-    "noReminder": "Personne à relancer aujourd'hui.",
-    "nextMilestones": "Le stock, les reçus et les bénéfices arrivent aux prochains jalons."
+    "noReminder": "Personne à relancer aujourd'hui."
   },
   "credentials": {
     "title": "Identifiants à transmettre",
@@ -691,7 +692,12 @@
       "defaultReason": "Inventaire",
       "submit": "Enregistrer l'inventaire",
       "done": "{count, plural, =0 {Inventaire : aucun écart.} one {Inventaire : # ajustement enregistré.} other {Inventaire : # ajustements enregistrés.}}"
-    }
+    },
+    "watchTitle": "Stock à surveiller",
+    "seeStock": "Voir le stock",
+    "watchEmpty": "Rien à racheter pour l'instant.",
+    "loading": "Chargement…",
+    "ruptureShort": "rupture vers le {date}"
   },
   "documents": {
     "receipt": "Reçu",
@@ -743,5 +749,86 @@
     "shared": "Relevé partagé.",
     "downloaded": "Relevé téléchargé : envoyez-le dans WhatsApp depuis vos fichiers.",
     "shareHint": "Sur téléphone, le relevé s'ouvre dans le menu de partage (WhatsApp…). Sinon, il est téléchargé."
+  },
+  "cash": {
+    "title": "Caisse",
+    "intro": "Ventes du jour et clôture du soir.",
+    "loading": "Chargement…",
+    "chooseDay": "Jour",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "daySales": "Ventes du jour",
+    "daySalesOf": "Ventes du {date}",
+    "approx": "≈ {amount}",
+    "accountTakes": "Prises à compte",
+    "wholeSalesCash": "Sacs entiers au comptant",
+    "counterCashClosed": "Comptant au détail (clôture)",
+    "counterCashEstimated": "Comptant au détail (estimé)",
+    "unknown": "Pas encore connu",
+    "basis": {
+      "closed": "Clôture faite",
+      "estimated": "Estimation",
+      "unknown": "Sans clôture"
+    },
+    "formula": "Ventes du jour = prises à compte + sacs entiers au comptant + ventes au comptant au détail.",
+    "estimateHint": "Sans clôture, le comptant au détail est estimé d'après le rythme des derniers sacs. Faites la clôture pour le chiffre réel.",
+    "closeNow": "Faire la clôture",
+    "closingOf": "Clôture du {date}",
+    "closingHint": "Saisissez tout l'argent reçu aujourd'hui pour chaque moyen, sans le fond de caisse. L'application retire elle-même les versements des clients et les sacs vendus entiers.",
+    "replaces": "Une clôture existe déjà ce jour-là ({amount} reçus). La nouvelle la remplacera ; l'ancienne reste dans l'historique.",
+    "includesPayments": "Dont versements de clients : {amount}",
+    "received": "Argent reçu",
+    "minusPayments": "Versements des clients à compte",
+    "minusWholeSales": "Sacs entiers vendus au comptant",
+    "counterCash": "Ventes au comptant au détail",
+    "negative": "Il y a plus de versements et de sacs entiers que d'argent reçu : vérifiez les montants avant d'enregistrer.",
+    "note": "Note (facultatif)",
+    "save": "Enregistrer la clôture",
+    "saved": "Clôture enregistrée.",
+    "history": "Dernières clôtures",
+    "noHistory": "Aucune clôture pour l'instant.",
+    "receivedShort": "Reçu : {amount}",
+    "counterShort": "Détail : {amount}",
+    "corrected": "Corrigée",
+    "pendingSend": "En attente d'envoi"
+  },
+  "profits": {
+    "title": "Bénéfices",
+    "periodLabel": "Du {from} au {to}",
+    "choosePeriod": "Période",
+    "periods": {
+      "current": "Ce mois-ci",
+      "previous": "Le mois dernier"
+    },
+    "from": "Du",
+    "to": "Au",
+    "apply": "Afficher",
+    "grossProfit": "Bénéfice brut",
+    "profitDetail": "Sacs terminés : {reviews} · sacs vendus entiers : {whole}",
+    "collected": "Argent encaissé",
+    "closedDays": "Jours clôturés : {closed, number} sur {days, number}. Sans clôture, seuls les versements et les sacs entiers sont comptés.",
+    "explain": "Le bénéfice n'est pas l'argent en caisse : une vente à crédit crée du bénéfice avant que l'argent ne rentre. Prises à compte sur la période : {takes}.",
+    "byProduct": "Par produit",
+    "noProfit": "Aucun sac terminé ni sac vendu entier sur cette période.",
+    "columns": {
+      "product": "Produit",
+      "finished": "Sacs terminés",
+      "whole": "Vendus entiers",
+      "margin": "Marge"
+    },
+    "unknownProduct": "Produit supprimé",
+    "approximation": "La marge d'un sac se compte le jour où il est terminé, sur son chiffre attendu (contenance × prix de détail) moins son prix d'achat.",
+    "controlTitle": "Comptant au détail : attendu et déclaré",
+    "controlHint": "Comparaison indicative, sans signalement automatique : le comptant attendu vient des sacs terminés sur la période, le comptant déclaré des clôtures.",
+    "expectedCounter": "Attendu d'après les sacs terminés",
+    "declaredCounter": "Déclaré aux clôtures",
+    "rowDetail": "{finished, plural, =0 {Aucun sac terminé} one {# sac terminé} other {# sacs terminés}} · {whole, plural, =0 {aucun vendu entier} one {# vendu entier} other {# vendus entiers}}"
+  },
+  "dashboard": {
+    "monthProfit": "Bénéfice brut du mois",
+    "monthCollected": "Argent encaissé ce mois-ci : {amount}",
+    "seeProfits": "Voir les bénéfices",
+    "recentTitle": "Dernières opérations",
+    "recentEmpty": "Aucune opération pour l'instant."
   }
 }

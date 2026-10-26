@@ -302,10 +302,11 @@ Exemple de test (baisse immédiate) :
 
 ### RG7 — Ventes quotidiennes et clôture de journée
 
-- **Clôture facultative**, 30 secondes, en fin de journée : total encaissé au comptant en espèces, Wave, Orange Money (les moyens de la boutique).
-- **Ventes du jour** = prises à compte du jour + ventes de conditionnements entiers du jour + total comptant de la clôture.
+- **Clôture facultative**, 30 secondes, en fin de journée : pour chaque moyen de la boutique (espèces, Wave, Orange Money…), **tout l'argent reçu dans la journée**, hors fond de caisse.
+- L'application en déduit les **ventes au comptant au détail** = total reçu − versements des clients à compte du jour − ventes de conditionnements entiers au comptant du jour (opérations annulées exclues). Le résultat est affiché avant d'enregistrer ; un résultat négatif est signalé (erreur de saisie probable), jamais corrigé en silence.
+- **Ventes du jour** = prises à compte du jour + ventes de conditionnements entiers au comptant du jour + ventes au comptant au détail de la clôture. (Une vente de sac entier sur le compte d'un client est une prise : elle n'est comptée qu'une fois.)
 - Sans clôture, afficher une **estimation** basée sur les bilans de sac, clairement marquée comme estimation.
-- **Contrôle** : quand un sac se termine, comparer son chiffre attendu aux encaissements de sa période (si les clôtures existent). Un écart important est signalé au propriétaire.
+- **Contrôle** : au MVP, le chiffre attendu des sacs et les ventes au comptant des clôtures sont **affichés côte à côte**, sans signalement automatique d'écart. Le contrôle automatique est reporté après le pilote.
 - Une clôture enregistrée peut être corrigée par une nouvelle clôture du même jour (la dernière fait foi, l'historique reste).
 
 ### RG8 — Bénéfice
@@ -590,4 +591,4 @@ L'ordre est indicatif : adapte-le si un autre enchaînement est plus efficace.
 
 - **Modèle économique** (abonnement, gratuit puis payant, installation + abonnement) : reporté. Ne pas construire la facturation avant décision.
 - Plusieurs conditionnements entamés en même temps pour un même produit : non au MVP, à rouvrir si un boutiquier le demande.
-- Seuils par défaut (alerte d'avance, jours sans versement pour le crédit libre, écart de contrôle de caisse) : proposer des valeurs raisonnables, réglables, et les faire valider pendant le pilote.
+- Seuils par défaut (alerte d'avance, jours sans versement pour le crédit libre, écart de contrôle de caisse, une fois le contrôle automatique ajouté après le pilote) : proposer des valeurs raisonnables, réglables, et les faire valider pendant le pilote.

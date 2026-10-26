@@ -35,6 +35,10 @@ describe("can (matrice CLAUDE.md §4.2, jalon 2)", () => {
     expect(can("platformAdmin", "viewCustomers")).toBe(false);
     expect(can("owner", "manageCatalog")).toBe(true);
     expect(can("manager", "manageCatalog")).toBe(false);
+    // Bénéfices : propriétaire et comptable ; le gérant ne voit que les ventes du jour (CLAUDE.md §4.2).
+    expect(can("owner", "viewProfits")).toBe(true);
+    expect(can("accountant", "viewProfits")).toBe(true);
+    expect(can("manager", "viewProfits")).toBe(false);
   });
 
   it("sans rôle, aucune capacité", () => {

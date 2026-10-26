@@ -14,3 +14,4 @@ export {
   type StockView,
 } from "./domain/stock";
 export { StockApp, type StockAppProps } from "./ui/StockApp";
+export { StockWatch } from "./ui/StockWatch";

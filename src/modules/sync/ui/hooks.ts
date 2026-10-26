@@ -1,7 +1,7 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import type { LocalCustomer, LocalLine, LocalMovement, LocalOperation, LocalPackage, LocalProduct, LocalProfile, LocalRequest, LocalReview, LocalShop } from "../data/local-db";
+import type { LocalClosing, LocalCustomer, LocalLine, LocalMovement, LocalOperation, LocalPackage, LocalProduct, LocalProfile, LocalRequest, LocalReview, LocalShop } from "../data/local-db";
 import type { OutboxEntry } from "../domain/sync";
 import { useOptionalSync } from "./SyncProvider";
 
@@ -16,6 +16,7 @@ export interface LocalShopData {
   packages: LocalPackage[];
   movements: LocalMovement[];
   reviews: LocalReview[];
+  closings: LocalClosing[];
   /** Le premier téléchargement n'a jamais eu lieu sur cet appareil. */
   neverSynced: boolean;
 }
@@ -26,7 +27,7 @@ export function useLocalShop(shopId: string): LocalShopData | undefined {
   const db = useOptionalSync()?.engine.db;
   return useLiveQuery(async () => {
     if (!db) return undefined;
-    const [customers, operations, outbox, shop, profiles, requests, products, packages, movements, reviews, cursor] = await Promise.all([
+    const [customers, operations, outbox, shop, profiles, requests, products, packages, movements, reviews, closings, cursor] = await Promise.all([
       db.customers.where("shopId").equals(shopId).toArray(),
       db.operations.where("shopId").equals(shopId).toArray(),
       db.outbox.orderBy("seq").toArray(),
@@ -37,6 +38,7 @@ export function useLocalShop(shopId: string): LocalShopData | undefined {
       db.packages.where("shopId").equals(shopId).toArray(),
       db.movements.where("shopId").equals(shopId).toArray(),
       db.reviews.where("shopId").equals(shopId).toArray(),
+      db.closings.where("shopId").equals(shopId).toArray(),
       db.meta.get(`cursor:${shopId}:customers`),
     ]);
     return {
@@ -50,6 +52,7 @@ export function useLocalShop(shopId: string): LocalShopData | undefined {
       packages,
       movements,
       reviews,
+      closings,
       neverSynced: !shop && !cursor,
     };
   }, [db, shopId]);

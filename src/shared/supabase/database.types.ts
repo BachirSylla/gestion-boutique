@@ -281,6 +281,86 @@ export type Database = {
           },
         ]
       }
+      day_closing_amounts: {
+        Row: {
+          amount: number
+          closing_id: string
+          payment_method_id: string
+          shop_id: string
+        }
+        Insert: {
+          amount: number
+          closing_id: string
+          payment_method_id: string
+          shop_id: string
+        }
+        Update: {
+          amount?: number
+          closing_id?: string
+          payment_method_id?: string
+          shop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "day_closing_amounts_closing_id_shop_id_fkey"
+            columns: ["closing_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "day_closings"
+            referencedColumns: ["id", "shop_id"]
+          },
+          {
+            foreignKeyName: "day_closing_amounts_payment_method_id_shop_id_fkey"
+            columns: ["payment_method_id", "shop_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id", "shop_id"]
+          },
+        ]
+      }
+      day_closings: {
+        Row: {
+          author_id: string
+          business_date: string
+          device_created_at: string
+          id: string
+          note: string | null
+          schema_version: number
+          server_created_at: string
+          shop_id: string
+          total_received: number
+        }
+        Insert: {
+          author_id: string
+          business_date: string
+          device_created_at: string
+          id: string
+          note?: string | null
+          schema_version?: number
+          server_created_at?: string
+          shop_id: string
+          total_received: number
+        }
+        Update: {
+          author_id?: string
+          business_date?: string
+          device_created_at?: string
+          id?: string
+          note?: string | null
+          schema_version?: number
+          server_created_at?: string
+          shop_id?: string
+          total_received?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "day_closings_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lots: {
         Row: {
           created_by: string
@@ -1279,6 +1359,17 @@ export type Database = {
           p_product_id: string
           p_purchase_price: number
           p_supplier: string
+        }
+        Returns: Json
+      }
+      record_day_closing: {
+        Args: {
+          p_amounts: Json
+          p_business_date: string
+          p_device_created_at: string
+          p_id: string
+          p_note: string
+          p_shop_id: string
         }
         Returns: Json
       }

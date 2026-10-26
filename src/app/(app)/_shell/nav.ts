@@ -4,9 +4,8 @@ import type { CurrentAccount } from "@/modules/auth-accounts/server";
 import type { NavItem } from "./NavLinks";
 
 /**
- * Entrées de navigation selon le rôle. `bottom` : barre du bas sur téléphone (4 entrées au plus,
+ * Entrées de navigation selon le rôle. `bottom` : barre du bas sur téléphone (5 entrées au plus,
  * la dernière ouvre le menu) ; `all` : menu latéral sur ordinateur et page Menu.
- * Les modules des jalons suivants (stock, bénéfices) s'ajouteront ici.
  */
 export async function navigation(account: Pick<CurrentAccount, "role">, pendingCancellations: number): Promise<{ bottom: NavItem[]; all: NavItem[] }> {
   const t = await getTranslations("nav");
@@ -21,8 +20,14 @@ export async function navigation(account: Pick<CurrentAccount, "role">, pendingC
   const all: NavItem[] = [
     item("/", "home", t("home")),
     ...(can(role, "viewCustomers")
-      ? [item("/customers", "customers", t("customers")), item("/stock", "stock", t("stock")), item("/reminders", "reminders", t("reminders"))]
+      ? [
+          item("/customers", "customers", t("customers")),
+          item("/stock", "stock", t("stock")),
+          item("/cash", "cash", t("cash")),
+          item("/reminders", "reminders", t("reminders")),
+        ]
       : []),
+    ...(can(role, "viewProfits") ? [item("/profits", "profits", t("profits"))] : []),
     ...(can(role, "decideCancellations") ? [item("/cancellations", "cancellations", t("cancellations"), pendingCancellations)] : []),
     ...(can(role, "manageCatalog") ? [item("/catalog", "catalog", t("catalog"))] : []),
     ...(can(role, "manageTeam") ? [item("/team", "team", t("team"))] : []),
@@ -33,6 +38,8 @@ export async function navigation(account: Pick<CurrentAccount, "role">, pendingC
   const bottom: NavItem[] = [
     item("/", "home", t("home")),
     ...(can(role, "viewCustomers") ? [item("/customers", "customers", t("customers")), item("/stock", "stock", t("stock"))] : []),
+    // Bénéfices pour le propriétaire et le comptable ; le gérant a la caisse (ventes du jour).
+    ...(can(role, "viewProfits") ? [item("/profits", "profits", t("profits"))] : can(role, "recordOperations") ? [item("/cash", "cash", t("cash"))] : []),
     item("/menu", "menu", t("menu"), pendingCancellations),
   ];
   return { bottom, all };

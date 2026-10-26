@@ -1,6 +1,6 @@
 // Moteur de synchronisation : file d'envoi idempotente (dans l'ordre) + téléchargement incrémental.
 import { advanceCursor, classifyOutcome, isCustomerCommand, pullFrom, retryDelay, toCancellationRequest, type OutboxCommand, type OutboxEntry, type RpcErrorLike } from "../domain/sync";
-import type { LocalCustomer, LocalDatabase, LocalLine, LocalMovement, LocalOperation, LocalPackage, LocalProduct, LocalProfile, LocalRequest, LocalReview, LocalShop } from "./local-db";
+import type { LocalClosing, LocalCustomer, LocalDatabase, LocalLine, LocalMovement, LocalOperation, LocalPackage, LocalProduct, LocalProfile, LocalRequest, LocalReview, LocalShop } from "./local-db";
 
 export interface PullCursors {
   customers: string | null;
@@ -21,6 +21,8 @@ export interface PullResult {
   packages?: LocalPackage[];
   movements?: LocalMovement[];
   reviews?: LocalReview[];
+  /** Clôtures des dernières semaines (remplacées à chaque passage). */
+  closings?: LocalClosing[];
   /** Horodatages serveur vus, pour avancer les curseurs. */
   seen: { customers: string[]; operations: string[]; requests: string[] };
 }
@@ -197,8 +199,23 @@ export class SyncEngine {
   /** Envoi réussi : l'entrée quitte la file ; une copie provisoire évite un « trou » jusqu'au téléchargement. */
   private async confirm(entry: OutboxEntry) {
     const c = entry.command;
-    await this.db.transaction("rw", [this.db.outbox, this.db.operations, this.db.lines, this.db.customers], async () => {
+    await this.db.transaction("rw", [this.db.outbox, this.db.operations, this.db.lines, this.db.customers, this.db.closings], async () => {
       await this.db.outbox.delete(entry.seq!);
+      if (c.type === "cash.close") {
+        const totalReceived = c.amounts.reduce((s, a) => s + a.amount, 0);
+        await this.db.closings.put({
+          id: entry.id,
+          shopId: c.shopId,
+          businessDate: c.businessDate,
+          totalReceived,
+          amounts: c.amounts,
+          note: c.note,
+          authorId: entry.authorId,
+          deviceCreatedAt: entry.deviceCreatedAt,
+          serverCreatedAt: new Date(this.now()).toISOString(),
+        });
+        return;
+      }
       if (c.type === "customer.create") {
         await this.db.customers.update(c.customer.id, { localOnly: false });
         return;
@@ -274,7 +291,7 @@ export class SyncEngine {
         operations: pullFrom(cursors.operations),
         requests: pullFrom(cursors.requests),
       });
-      await this.db.transaction("rw", [this.db.customers, this.db.operations, this.db.lines, this.db.requests, this.db.shops, this.db.profiles, this.db.products, this.db.packages, this.db.movements, this.db.reviews, this.db.meta], async () => {
+      await this.db.transaction("rw", [this.db.customers, this.db.operations, this.db.lines, this.db.requests, this.db.shops, this.db.profiles, this.db.products, this.db.packages, this.db.movements, this.db.reviews, this.db.closings, this.db.meta], async () => {
         await this.db.customers.bulkPut(result.customers);
         await this.db.operations.bulkPut(result.operations.map((op) => ({ ...op, provisional: false })));
         // Lignes provisoires (identifiant local) remplacées par celles du serveur.
@@ -300,6 +317,10 @@ export class SyncEngine {
           await this.db.reviews.where("shopId").equals(shopId).delete();
           await this.db.reviews.bulkPut(result.reviews);
         }
+        if (result.closings) {
+          await this.db.closings.where("shopId").equals(shopId).delete();
+          await this.db.closings.bulkPut(result.closings);
+        }
         await this.db.meta.bulkPut([
           { key: `cursor:${shopId}:customers`, value: advanceCursor(cursors.customers, result.seen.customers) },
           { key: `cursor:${shopId}:operations`, value: advanceCursor(cursors.operations, result.seen.operations) },
@@ -318,7 +339,8 @@ export class SyncEngine {
   /** Oublie les données des boutiques qui ne sont plus accessibles (rattachement retiré). */
   async forgetOtherShops(): Promise<void> {
     const keep = new Set(this.options.shopIds);
-    await this.db.transaction("rw", [this.db.customers, this.db.operations, this.db.requests, this.db.shops, this.db.products, this.db.packages, this.db.movements, this.db.reviews], async () => {
+    await this.db.transaction("rw", [this.db.customers, this.db.operations, this.db.requests, this.db.shops, this.db.products, this.db.packages, this.db.movements, this.db.reviews, this.db.closings], async () => {
+      await this.db.closings.filter((c) => !keep.has(c.shopId)).delete();
       await this.db.products.filter((p) => !keep.has(p.shopId)).delete();
       await this.db.packages.filter((p) => !keep.has(p.shopId)).delete();
       await this.db.movements.filter((m) => !keep.has(m.shopId)).delete();

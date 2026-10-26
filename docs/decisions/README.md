@@ -19,3 +19,4 @@ On peut changer d'avis : on écrit alors une nouvelle note qui remplace l'ancien
 | [0012](0012-catalogue-et-prix.md) | Catalogue et prix : grille versionnée, politique RG4, formats favoris, catalogue de départ | Acceptée |
 | [0013](0013-stock.md) | Stock : conditionnements, mouvements immuables, FIFO, bilans de sac, RG4, inventaire, hors ligne | Acceptée |
 | [0014](0014-documents.md) | Reçus PNG, relevés PDF (jsPDF à la demande), partage WhatsApp, relances, hors ligne | Acceptée |
+| [0015](0015-caisse-et-tableau-de-bord.md) | Clôture (journal immuable, hors ligne), ventes du jour déduites, bénéfice brut, tableau de bord | Acceptée |

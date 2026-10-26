@@ -45,7 +45,9 @@ export type OutboxCommand =
   | { type: "stock.estimate"; shopId: string; productId: string; estimate: number }
   | { type: "stock.adjust"; shopId: string; productId: string; delta: number; reason: string | null; purchasePrice: Amount | null }
   | { type: "stock.cancel"; shopId: string; productId: string; movementId: string; reason: string | null; fallbackReason: string }
-  | { type: "stock.request"; shopId: string; productId: string; movementId: string; reason: string };
+  | { type: "stock.request"; shopId: string; productId: string; movementId: string; reason: string }
+  // Jalon 7 : clôture de journée (tout l'argent reçu par moyen de paiement).
+  | { type: "cash.close"; shopId: string; businessDate: string; amounts: { paymentMethodId: string; amount: Amount }[]; note: string | null };
 
 /** Commande qui modifie le journal client (et donc les soldes). */
 export function isCustomerCommand(c: OutboxCommand): c is Extract<OutboxCommand, { type: "take" | "payment" | "cancel" | "request" }> {
