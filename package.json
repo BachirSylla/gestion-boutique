@@ -19,7 +19,9 @@
     "admin:bootstrap": "tsx scripts/bootstrap-admin.mts",
     "check:secrets": "tsx scripts/check-secrets.ts",
     "icons": "tsx scripts/generate-icons.mts",
-    "auth:config": "tsx scripts/auth-config.mts"
+    "auth:config": "tsx scripts/auth-config.mts",
+    "demo:seed": "tsx scripts/demo.mts seed",
+    "demo:reset": "tsx scripts/demo.mts reset"
   },
   "packageManager": "pnpm@11.0.9",
   "dependencies": {

@@ -94,6 +94,12 @@ Détails : [0014](docs/decisions/0014-documents.md).
 
 Détails : [0015](docs/decisions/0015-caisse-et-tableau-de-bord.md).
 
+## Données de démonstration et pilote
+
+- `pnpm demo:seed -- --confirm` crée le jeu de démonstration de CLAUDE.md §11 sur la base distante : propriétaire « [démo] Fatou Diallo », Boutique Keur Fatou (Médina), gérant Moussa, riz / huile / sucre / lait, clients Awa, Ibrahima, Mariama, Cheikh, trois semaines d'historique (prises, versements, bilans de sac, clôtures, hausse de prix en attente). Les mots de passe sont affichés une seule fois. `--dry-run` fait tout puis annule.
+- `pnpm demo:reset -- --confirm` supprime ce propriétaire de démonstration et ses données, et rien d'autre.
+- Mise en ligne et déroulé du pilote : [docs/pilote.md](docs/pilote.md).
+
 ## Organisation
 
 ```
