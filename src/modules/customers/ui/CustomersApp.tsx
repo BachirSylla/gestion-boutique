@@ -21,11 +21,12 @@ import { Badge, Balance, Button, Card, Notice, PageHeader } from "@/shared/ui";
 import { groupByDay, isOverLimit, limitUsage } from "../domain/customers";
 import { CustomerList, type CustomerListItem } from "./CustomerList";
 import { NewCustomerForm } from "./NewCustomerForm";
+import { ReceiptButton, RemindLink, StatementPanel, type DocCustomer, type DocOperation, type DocShop } from "@/modules/documents";
 
 export interface CustomersAppProps {
   userId: string;
   role: "owner" | "manager" | "accountant" | "platformAdmin" | null;
-  shop: { id: string; name: string; timezone: string };
+  shop: { id: string; name: string; timezone: string; district: string | null; city: string | null; phone: string | null };
   canRecord: boolean;
   canManage: boolean;
 }
@@ -41,7 +42,8 @@ type Route =
   | { view: "pick"; next: "take" | "payment" }
   | { view: "customer"; id: string }
   | { view: "take"; id: string }
-  | { view: "payment"; id: string };
+  | { view: "payment"; id: string }
+  | { view: "statement"; id: string };
 
 function parseHash(hash: string): Route {
   const parts = hash.replace(/^#\/?/, "").split("/").filter(Boolean);
@@ -50,6 +52,7 @@ function parseHash(hash: string): Route {
   if (parts[0] === "c" && parts[1]) {
     if (parts[2] === "take") return { view: "take", id: parts[1] };
     if (parts[2] === "payment") return { view: "payment", id: parts[1] };
+    if (parts[2] === "statement") return { view: "statement", id: parts[1] };
     return { view: "customer", id: parts[1] };
   }
   return { view: "list" };
@@ -116,7 +119,8 @@ export function CustomersApp(props: CustomersAppProps) {
       );
     case "customer":
     case "take":
-    case "payment": {
+    case "payment":
+    case "statement": {
       const customer = data.customers.find((c) => c.id === route.id);
       if (!customer) {
         return (
@@ -132,7 +136,17 @@ export function CustomersApp(props: CustomersAppProps) {
       if (route.view === "payment" && props.canRecord && !customer.archived) {
         return <PaymentScreen {...props} data={data} customer={customer} balance={balance} onSaved={(id) => (setSaved({ id, kind: "payment" }), go(`#/c/${customer.id}`))} />;
       }
-      return <CustomerSheet {...props} data={data} customerId={customer.id} balance={balance} saved={saved} onCloseSaved={() => setSaved(null)} />;
+      return (
+        <CustomerSheet
+          {...props}
+          data={data}
+          customerId={customer.id}
+          balance={balance}
+          saved={saved}
+          onCloseSaved={() => setSaved(null)}
+          showStatement={route.view === "statement"}
+        />
+      );
     }
     default:
       return (
@@ -244,7 +258,7 @@ interface SheetOperation extends ViewOperation {
   takeMode: "quick" | "detailed" | null;
   paymentMethodId: string | null;
   cancellationReason: string | null;
-  lines: { label: string; quantityMilli: number; unit: string; unitPrice: number; lineAmount: number }[];
+  lines: { label: string; quantityMilli: number; unit: string; unitPrice: number; lineAmount: number; formatLabel?: string | null; formatCount?: number | null }[];
   rejectedCode?: string;
 }
 
@@ -259,12 +273,14 @@ function CustomerSheet({
   canManage,
   saved,
   onCloseSaved,
+  showStatement,
 }: CustomersAppProps & {
   data: LocalShopData;
   customerId: string;
   balance: number;
   saved: { id: string; kind: "take" | "payment" } | null;
   onCloseSaved: () => void;
+  showStatement: boolean;
 }) {
   const t = useTranslations();
   const format = useFormatter();
@@ -290,7 +306,15 @@ function CustomerSheet({
         lines: server
           ? serverLines.filter((l) => l.operationId === op.id)
           : command?.type === "take"
-            ? command.lines.map((l) => ({ label: l.label, quantityMilli: l.quantity_milli, unit: l.unit, unitPrice: l.unit_price, lineAmount: l.line_amount }))
+            ? command.lines.map((l) => ({
+                label: l.label,
+                quantityMilli: l.quantity_milli,
+                unit: l.unit,
+                unitPrice: l.unit_price,
+                lineAmount: l.line_amount,
+                formatLabel: l.format_label ?? null,
+                formatCount: l.format_count ?? null,
+              }))
             : [],
         rejectedCode: entries.get(op.id)?.error,
       };
@@ -327,6 +351,33 @@ function CustomerSheet({
   const savedOp = saved ? operations.find((o) => o.id === saved.id) : undefined;
   const time = (iso: string) => format.dateTime(new Date(iso), { hour: "2-digit", minute: "2-digit", timeZone: shop.timezone });
 
+  // Documents (reçus, relevés) : calculés sur l'appareil, donc disponibles hors ligne.
+  const docOperations: DocOperation[] = counted.map((op) => ({
+    id: op.id,
+    kind: op.kind,
+    amount: op.amount,
+    deviceCreatedAt: op.deviceCreatedAt,
+    cancelsOperationId: op.cancelsOperationId,
+    note: op.note,
+    lines: op.lines,
+    authorName: data.profiles.get(op.authorId) ?? "",
+    paymentMethodLabel: op.kind === "payment" ? methodLabel(op.paymentMethodId) || null : null,
+  }));
+  const docCustomer: DocCustomer = { fullName: customer.fullName, phone: customer.phone, type: customer.type, dueDay };
+  const docShop: DocShop = { name: shop.name, district: shop.district, city: shop.city, phone: shop.phone, timezone: shop.timezone };
+  const docOf = (id: string) => docOperations.find((o) => o.id === id);
+
+  if (showStatement) {
+    return (
+      <div className="mx-auto max-w-2xl">
+        <PageHeader title={t("documents.statementTitle")} intro={customer.fullName} back={{ href: `#/c/${customer.id}`, label: customer.fullName }} />
+        <Card>
+          <StatementPanel operations={docOperations} customer={docCustomer} shop={docShop} />
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <>
       <PageHeader
@@ -344,6 +395,11 @@ function CustomerSheet({
             onUndo={() => cancel(saved.id)}
             onClose={onCloseSaved}
           />
+          {docOf(saved.id) ? (
+            <div className="mt-2">
+              <ReceiptButton operation={docOf(saved.id)!} operations={docOperations} customer={docCustomer} shop={docShop} variant="secondary" label={t("documents.sendReceipt")} />
+            </div>
+          ) : null}
         </div>
       ) : null}
       {customer.archived ? (
@@ -398,6 +454,10 @@ function CustomerSheet({
                 {t("customers.actions.call")}
               </a>
             ) : null}
+            <a href={`#/c/${customer.id}/statement`} className="inline-flex min-h-12 items-center justify-center rounded-bouton bg-vert-doux font-bold text-vert-fonce">
+              {t("documents.statement")}
+            </a>
+            <RemindLink customer={docCustomer} balance={balance} shopName={shop.name} />
             {canManage && !customer.localOnly ? (
               <Link href={`/customers/${customer.id}/edit`} className="inline-flex min-h-12 items-center justify-center rounded-bouton bg-vert-doux font-bold text-vert-fonce">
                 {t("customers.edit")}
@@ -436,7 +496,14 @@ function CustomerSheet({
                             </Button>
                           </div>
                         ) : (
-                          <OperationActions path={pathFor(op)} onCancel={() => cancel(op.id)} onRequest={(reason) => request(op.id, reason)} />
+                          <div className="flex flex-wrap items-start gap-x-2">
+                            {op.kind !== "cancellation" && !cancelledIds.has(op.id) && docOf(op.id) ? (
+                              <div className="mt-2">
+                                <ReceiptButton operation={docOf(op.id)!} operations={docOperations} customer={docCustomer} shop={docShop} />
+                              </div>
+                            ) : null}
+                            <OperationActions path={pathFor(op)} onCancel={() => cancel(op.id)} onRequest={(reason) => request(op.id, reason)} />
+                          </div>
                         )}
                       </li>
                     ))}

@@ -40,6 +40,8 @@ export interface LocalLine {
   unit: string;
   unitPrice: Amount;
   lineAmount: Amount;
+  formatLabel?: string | null;
+  formatCount?: number | null;
 }
 
 export interface LocalRequest {

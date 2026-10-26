@@ -77,6 +77,15 @@ Détails : [docs/decisions/0011](docs/decisions/0011-synchronisation-hors-ligne.
 
 Détails : [0012](docs/decisions/0012-catalogue-et-prix.md), [0013](docs/decisions/0013-stock.md).
 
+## Documents (jalon 6)
+
+- **Reçu** (image PNG) de chaque prise ou versement : ancien et nouveau solde, lignes, auteur, numéro d'opération. Bouton « Envoyer le reçu » juste après la saisie et dans l'historique.
+- **Relevé de compte** (PDF A4) : ce mois-ci, le mois dernier ou dates choisies ; solde après chaque ligne, annulations barrées.
+- **Partage** WhatsApp via le menu de partage du téléphone, sinon téléchargement. **Relance** par lien `wa.me` prérempli.
+- Tout est généré sur l'appareil : fonctionne hors ligne.
+
+Détails : [0014](docs/decisions/0014-documents.md).
+
 ## Organisation
 
 ```

@@ -18,3 +18,4 @@ On peut changer d'avis : on écrit alors une nouvelle note qui remplace l'ancien
 | [0011](0011-synchronisation-hors-ligne.md) | Hors ligne : écran local, file d'envoi idempotente, téléchargement par curseurs, indicateur | Acceptée |
 | [0012](0012-catalogue-et-prix.md) | Catalogue et prix : grille versionnée, politique RG4, formats favoris, catalogue de départ | Acceptée |
 | [0013](0013-stock.md) | Stock : conditionnements, mouvements immuables, FIFO, bilans de sac, RG4, inventaire, hors ligne | Acceptée |
+| [0014](0014-documents.md) | Reçus PNG, relevés PDF (jsPDF à la demande), partage WhatsApp, relances, hors ligne | Acceptée |

@@ -145,7 +145,18 @@ export class SupabaseTransport implements SyncTransport {
         .in("operation_id", detailedIds.slice(i, i + 200));
       if (error) throw new Error(error.message);
       for (const l of data ?? []) {
-        lines.push({ id: l.id, operationId: l.operation_id, position: l.position, label: l.label, quantityMilli: l.quantity_milli, unit: l.unit, unitPrice: l.unit_price, lineAmount: l.line_amount });
+        lines.push({
+          id: l.id,
+          operationId: l.operation_id,
+          position: l.position,
+          label: l.label,
+          quantityMilli: l.quantity_milli,
+          unit: l.unit,
+          unitPrice: l.unit_price,
+          lineAmount: l.line_amount,
+          formatLabel: l.format_label,
+          formatCount: l.format_count,
+        });
       }
     }
 

@@ -253,6 +253,8 @@ export class SyncEngine {
             unit: l.unit,
             unitPrice: l.unit_price,
             lineAmount: l.line_amount,
+            formatLabel: l.format_label ?? null,
+            formatCount: l.format_count ?? null,
           })),
         );
       } else if (c.type === "payment") {

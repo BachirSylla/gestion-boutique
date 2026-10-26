@@ -692,5 +692,56 @@
       "submit": "Enregistrer l'inventaire",
       "done": "{count, plural, =0 {Inventaire : aucun écart.} one {Inventaire : # ajustement enregistré.} other {Inventaire : # ajustements enregistrés.}}"
     }
+  },
+  "documents": {
+    "receipt": "Reçu",
+    "sendReceipt": "Envoyer le reçu",
+    "receiptTitle": "Reçu de {name}",
+    "receiptTake": "Reçu de prise",
+    "receiptPayment": "Reçu de versement",
+    "method": "Moyen de paiement",
+    "totalTaken": "Total pris",
+    "totalPaid": "Total versé",
+    "balanceBefore": "Ancien solde",
+    "balanceAfter": "Nouveau solde",
+    "youOwe": "vous devez {amount}",
+    "advanceLeft": "avance restante {amount}",
+    "settled": "compte à jour",
+    "dueDate": "Échéance : {date}",
+    "servedBy": "Servi par {name}",
+    "operationNumber": "Opération n° {number}",
+    "formatLine": "{count, number} × {label}",
+    "preparing": "Préparation…",
+    "statement": "Relevé",
+    "statementTitle": "Relevé de compte",
+    "makeStatement": "Préparer le relevé (PDF)",
+    "choosePeriod": "Période",
+    "periods": {
+      "current": "Ce mois-ci",
+      "previous": "Le mois dernier",
+      "custom": "Choisir les dates"
+    },
+    "from": "Du",
+    "to": "Au",
+    "period": "Période du {from} au {to}",
+    "carried": "Solde reporté",
+    "totalTakenPeriod": "Total pris sur la période",
+    "totalPaidPeriod": "Total versé sur la période",
+    "amountDue": "Reste à payer",
+    "columns": {
+      "date": "Date",
+      "detail": "Détail",
+      "taken": "Pris",
+      "paid": "Versé",
+      "balance": "Solde"
+    },
+    "totals": "Totaux de la période",
+    "cancelled": "(annulée)",
+    "cancelledNote": "Les opérations annulées restent affichées, barrées : elles ne comptent ni dans les totaux ni dans le solde.",
+    "edited": "Édité le {date} avec Bitig",
+    "page": "Page {page, number} / {pages, number}",
+    "shared": "Relevé partagé.",
+    "downloaded": "Relevé téléchargé : envoyez-le dans WhatsApp depuis vos fichiers.",
+    "shareHint": "Sur téléphone, le relevé s'ouvre dans le menu de partage (WhatsApp…). Sinon, il est téléchargé."
   }
 }

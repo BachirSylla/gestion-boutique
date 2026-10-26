@@ -13,7 +13,7 @@ export default async function CustomersPage() {
     <CustomersApp
       userId={account.userId}
       role={account.role}
-      shop={{ id: shop.id, name: shop.name, timezone: shop.timezone }}
+      shop={{ id: shop.id, name: shop.name, timezone: shop.timezone, district: shop.district, city: shop.city, phone: shop.phone_e164 }}
       canRecord={can(account.role, "recordOperations")}
       canManage={can(account.role, "manageCustomers")}
     />
