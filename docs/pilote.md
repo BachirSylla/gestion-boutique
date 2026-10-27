@@ -10,7 +10,11 @@ Objectif : faire tourner Bitig dans une vraie boutique pendant 2 à 4 semaines, 
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
    - `SUPABASE_SECRET_KEY` (**jamais** dans une variable `NEXT_PUBLIC_*`)
 3. Déployer la branche `main`. Ouvrir l'adresse `https://….vercel.app/login` et se connecter avec le compte administrateur.
-4. Avant de facturer des boutiquiers : passer aux offres payantes (usage commercial, pas de mise en pause, sauvegardes) — voir CLAUDE.md §7.5. D'ici là, faire une sauvegarde régulière de la base.
+4. **Supabase Auth : aucun réglage obligatoire.** Bitig n'envoie ni e-mail ni SMS et n'utilise aucun lien de redirection : connexion par numéro et mot de passe, réinitialisations faites par l'administrateur ou le propriétaire depuis l'application. Par hygiène, dans le tableau de bord Supabase (*Authentication → URL Configuration*) :
+   - **Site URL** : remplacer `http://localhost:3000` par l'adresse Vercel (`https://….vercel.app`, ou le domaine définitif plus tard) ;
+   - **Redirect URLs** : rien à ajouter.
+   Les autres réglages Auth (inscription publique désactivée, longueur du mot de passe, sessions longues pour le hors ligne) sont déjà appliqués ; `pnpm auth:config` vérifie qu'ils n'ont pas changé.
+5. Avant de facturer des boutiquiers : passer aux offres payantes (usage commercial, pas de mise en pause, sauvegardes) — voir CLAUDE.md §7.5. D'ici là, faire une sauvegarde régulière de la base.
 
 ## 2. Préparer la boutique
 
