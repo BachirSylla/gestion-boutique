@@ -30,6 +30,9 @@ Pour une démonstration avant d'installer chez le boutiquier : `pnpm demo:seed -
 
 ## 3. Ce qu'on observe pendant le pilote
 
+Avant le pilote, faire le tour complet de l'application avec le guide de recette : [recette.md](recette.md).
+
+
 | Sujet | Question |
 |---|---|
 | Rapidité | Une prise rapide prend-elle moins de 10 secondes ? |
