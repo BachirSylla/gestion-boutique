@@ -697,7 +697,8 @@
     "seeStock": "Voir le stock",
     "watchEmpty": "Rien à racheter pour l'instant.",
     "loading": "Chargement…",
-    "ruptureShort": "rupture vers le {date}"
+    "ruptureShort": "rupture vers le {date}",
+    "finishYes": "Oui, il est terminé"
   },
   "documents": {
     "receipt": "Reçu",

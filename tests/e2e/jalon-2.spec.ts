@@ -144,6 +144,7 @@ test("comptes : de la création du propriétaire à la suspension", async ({ bro
 
   // 6. Le propriétaire désactive le gérant : il est déconnecté avec un message.
   await owner.page.getByRole("button", { name: "Désactiver le compte" }).click();
+  await owner.page.getByTestId("confirm-dialog-ok").click();
   await expect(owner.page.getByText("Ce compte est désactivé : la personne ne peut plus se connecter.")).toBeVisible();
   await manager.page.goto("/");
   await expect(manager.page).toHaveURL(/\/login\?error=accountDisabled$/);
@@ -167,8 +168,10 @@ test("comptes : de la création du propriétaire à la suspension", async ({ bro
   await admin.page.goto("/admin");
   await admin.page.getByRole("link", { name: new RegExp(tenantName.replace(/[[\]]/g, "\\$&")) }).click();
   await admin.page.getByRole("button", { name: "Réinitialiser le mot de passe" }).click();
+  await admin.page.getByTestId("confirm-dialog-ok").click();
   await expect(admin.page.getByTestId("temporary-password")).toBeVisible();
   await admin.page.getByRole("button", { name: "Suspendre le propriétaire" }).click();
+  await admin.page.getByTestId("confirm-dialog-ok").click();
   await expect(admin.page.getByText("Ce propriétaire est suspendu")).toBeVisible();
   await shoot(admin.page, "admin-fiche-proprietaire");
   await owner.page.goto("/");

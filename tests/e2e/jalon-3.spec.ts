@@ -151,6 +151,7 @@ test("clients et journal : prises, versements, plafond, annulations", async ({ b
   await m.page.reload();
   const own = m.page.locator("li").filter({ hasText: `−500${NBSP}F` }).filter({ hasText: "par Ousmane Sarr" });
   await own.getByRole("button", { name: "Annuler l'opération" }).click();
+  await m.page.getByTestId("confirm-dialog-ok").click();
   await expectBalance(m.page, "−29 310 F", "doit");
 
   const ownersTake = m.page.locator("li").filter({ hasText: `−20${NBSP}000${NBSP}F` }).filter({ hasText: "par Fatou Diallo" });

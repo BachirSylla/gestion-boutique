@@ -5,7 +5,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { cancellationPath, OperationActions } from "@/modules/ledger";
 import { rejectionMessage, summarizeByCustomer, useLocalShop, useOptionalSync, type LocalShopData, type OutboxEntry } from "@/modules/sync";
 import { formatAmount, formatQuantity } from "@/shared/domain";
-import { AmountInput, Badge, Button, Card, ChoiceGroup, Notice, PageHeader, TextField } from "@/shared/ui";
+import { AmountInput, Badge, Button, Card, ChoiceGroup, Notice, PageHeader, TextField, useConfirm } from "@/shared/ui";
 import { ESTIMATE_CHOICES, estimateKey, inventoryDelta, needsReorder, ruptureEstimate, type StockView } from "../domain/stock";
 import { useProductStocks, type ProductStock } from "./useProductStocks";
 
@@ -182,6 +182,7 @@ function StockList({
 
 function StockCard({ stock, canRecord, shopId, enqueue }: { stock: ProductStock; canRecord: boolean; shopId: string; enqueue: (command: OutboxEntry["command"], message?: string) => void }) {
   const t = useTranslations("stock");
+  const confirm = useConfirm();
   const format = useFormatter();
   const { product, view } = stock;
   const rupture = ruptureEstimate(view, stock.durations, new Date());
@@ -217,7 +218,9 @@ function StockCard({ stock, canRecord, shopId, enqueue }: { stock: ProductStock;
             variant="secondary"
             disabled={!view.opened}
             onClick={() => {
-              if (window.confirm(t("finishConfirm", { product: product.name }))) enqueue({ type: "stock.finish", shopId, productId: product.id }, t("finished", { product: product.name }));
+              void confirm({ message: t("finishConfirm", { product: product.name }), confirmLabel: t("finishYes") }).then(
+                (ok) => ok && enqueue({ type: "stock.finish", shopId, productId: product.id }, t("finished", { product: product.name })),
+              );
             }}
           >
             {t("actions.finish")}
@@ -272,6 +275,7 @@ function ProductScreen({
   enqueue,
 }: StockAppProps & { stock: ProductStock; data: LocalShopData; enqueue: (command: OutboxEntry["command"], message?: string) => void }) {
   const t = useTranslations();
+  const confirm = useConfirm();
   const format = useFormatter();
   const lateReason = t("sync.lateCancellationReason");
   const { product, view } = stock;
@@ -318,8 +322,9 @@ function ProductScreen({
                   variant="primary"
                   disabled={!view.opened}
                   onClick={() => {
-                    if (window.confirm(t("stock.finishConfirm", { product: product.name })))
-                      enqueue({ type: "stock.finish", shopId: shop.id, productId: product.id }, t("stock.finished", { product: product.name }));
+                    void confirm({ message: t("stock.finishConfirm", { product: product.name }), confirmLabel: t("stock.finishYes") }).then(
+                      (ok) => ok && enqueue({ type: "stock.finish", shopId: shop.id, productId: product.id }, t("stock.finished", { product: product.name })),
+                    );
                   }}
                 >
                   {t("stock.actions.finish")}
