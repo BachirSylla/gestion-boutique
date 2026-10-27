@@ -3,6 +3,7 @@ import { Figtree } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 import { ConnectivityBanner, PwaProvider } from "@/shared/pwa";
+import { ConfirmProvider } from "@/shared/ui";
 import "./globals.css";
 
 // Police auto-hébergée par Next.js (téléchargée au build, aucun appel à Google côté client).
@@ -39,8 +40,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="min-h-dvh antialiased">
         <NextIntlClientProvider>
           <PwaProvider>
-            <ConnectivityBanner />
-            {children}
+            <ConfirmProvider>
+              <ConnectivityBanner />
+              {children}
+            </ConfirmProvider>
           </PwaProvider>
         </NextIntlClientProvider>
       </body>

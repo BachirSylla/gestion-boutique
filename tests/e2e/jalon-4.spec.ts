@@ -74,7 +74,8 @@ test("hors ligne : saisie sans réseau, reprise, renvoi sans doublon, refus visi
   await page.evaluate(() => window.dispatchEvent(new Event("online")));
   await expect(indicator(page)).toHaveAttribute("data-state", "synced");
   const db = admin();
-  const { data: cheikh } = await db.from("customers").select("id").eq("full_name", "Cheikh Diop").single();
+  // Restreint à la boutique de test : la démonstration a aussi un « Cheikh Diop ».
+  const { data: cheikh } = await db.from("customers").select("id").in("shop_id", readFixture().shopIds).eq("full_name", "Cheikh Diop").single();
   const { data: takes } = await db.from("customer_operations").select("amount").eq("customer_id", cheikh!.id).eq("kind", "take");
   expect(takes).toEqual([{ amount: 3000 }]);
 
@@ -107,6 +108,7 @@ test("hors ligne : saisie sans réseau, reprise, renvoi sans doublon, refus visi
   await o.page.getByLabel("Changer de boutique").first().selectOption({ label: "Boutique Keur Fatou" });
   await o.page.goto(`/customers/${cheikh!.id}/edit`);
   await o.page.getByRole("button", { name: "Archiver le client" }).click();
+  await o.page.getByTestId("confirm-dialog-ok").click();
   await expect(o.page).toHaveURL(/\/customers$/);
 
   await m.context.setOffline(false);

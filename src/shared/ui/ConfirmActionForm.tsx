@@ -1,8 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useActionState, type ReactNode } from "react";
+import { useActionState, useRef, type ReactNode } from "react";
 import type { ActionState } from "@/shared/server/action-state";
+import { useConfirm } from "./ConfirmDialog";
 import { SubmitButton } from "./form";
 import { Notice } from "./layout";
 
@@ -14,6 +15,7 @@ export function ConfirmActionForm({
   fields,
   label,
   confirmText,
+  confirmTone,
   successText,
   variant = "secondary",
   children,
@@ -22,6 +24,8 @@ export function ConfirmActionForm({
   fields: Record<string, string>;
   label: string;
   confirmText?: string;
+  /** Par défaut « danger » pour un bouton discret (ghost), sinon « primary ». */
+  confirmTone?: "primary" | "danger";
   successText?: string;
   variant?: "primary" | "secondary" | "ghost" | "accent";
   children?: ReactNode;
@@ -29,11 +33,23 @@ export function ConfirmActionForm({
   const te = useTranslations("errors");
   const tc = useTranslations("common");
   const [state, formAction] = useActionState(action as Action, { status: "idle" } as ActionState<unknown>);
+  const confirm = useConfirm();
+  const confirmed = useRef(false);
   return (
     <form
       action={formAction}
       onSubmit={(event) => {
-        if (confirmText && !window.confirm(confirmText)) event.preventDefault();
+        if (!confirmText || confirmed.current) {
+          confirmed.current = false;
+          return;
+        }
+        event.preventDefault();
+        const form = event.currentTarget;
+        void confirm({ message: confirmText, confirmLabel: label, tone: confirmTone ?? (variant === "ghost" ? "danger" : "primary") }).then((ok) => {
+          if (!ok) return;
+          confirmed.current = true;
+          form.requestSubmit();
+        });
       }}
       className="flex flex-col gap-2"
     >

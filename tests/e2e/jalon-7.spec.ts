@@ -66,6 +66,9 @@ test("caisse et tableau de bord : clôture hors ligne, correction, ventes du jou
   await page.getByRole("button", { name: "Ouvrir" }).click();
   await synced(page);
   await page.getByRole("button", { name: "Terminé" }).click();
+  await expect(page.getByRole("dialog")).toContainText("Sucre du jalon 7");
+  await page.screenshot({ path: "docs/captures/pilote/confirmation-390.png" });
+  await page.getByTestId("confirm-dialog-ok").click();
   await synced(page);
   // Un sac vendu entier au comptant 30 000 F : marge 2 000 F.
   await page.getByRole("link", { name: "Vendre entier" }).click();

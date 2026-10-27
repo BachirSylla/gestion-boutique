@@ -101,6 +101,7 @@ test("stock : réception, ouverture, prises, baisse immédiate, bilan, hausse ap
   // 4. Fin du sac : bilan = 25 kg × 315 + 25 kg × 300 = 15 375 F ; prises 630 F ; comptant 14 745 F ; marge 975 F.
   await mp.goto("/stock");
   await card(mp, "Riz du stock").getByRole("button", { name: "Terminé" }).click();
+  await mp.getByTestId("confirm-dialog-ok").click();
   await synced(mp);
   await mp.reload();
   await card(mp, "Riz du stock").getByRole("link", { name: /Riz du stock/ }).click();
@@ -133,6 +134,7 @@ test("stock : réception, ouverture, prises, baisse immédiate, bilan, hausse ap
   await mp.getByLabel("Prix d'achat par sac").fill("15000");
   await mp.getByRole("button", { name: "Enregistrer la réception" }).click();
   await mp.getByRole("button", { name: "Terminé" }).click();
+  await mp.getByTestId("confirm-dialog-ok").click();
   await mp.getByRole("button", { name: "Ouvrir" }).click();
   await expect(mp.getByText("1 sac fermé")).toBeVisible();
   await expect(mp.getByText("1 entamé (plein)")).toBeVisible();

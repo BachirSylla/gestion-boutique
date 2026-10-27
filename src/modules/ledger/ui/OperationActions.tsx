@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { Button, Notice, TextField } from "@/shared/ui";
+import { Button, Notice, TextField, useConfirm } from "@/shared/ui";
 import type { CancellationPath } from "../domain/operations";
 
 /**
@@ -20,6 +20,7 @@ export function OperationActions({
   onRequest: (reason: string) => void;
 }) {
   const t = useTranslations("ledger");
+  const confirm = useConfirm();
   const te = useTranslations("errors");
   const [askReason, setAskReason] = useState(false);
   const [reason, setReason] = useState("");
@@ -36,7 +37,7 @@ export function OperationActions({
         variant="ghost"
         className="mt-2 min-h-11 px-3 text-sm text-brique hover:bg-brique-doux"
         onClick={() => {
-          if (window.confirm(t("cancelConfirm"))) onCancel();
+          void confirm({ message: t("cancelConfirm"), confirmLabel: t("cancel"), tone: "danger" }).then((ok) => ok && onCancel());
         }}
       >
         {t("cancel")}

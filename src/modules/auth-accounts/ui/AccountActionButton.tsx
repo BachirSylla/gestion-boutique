@@ -1,9 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import type { ActionState } from "@/shared/server/action-state";
-import { Notice, SubmitButton } from "@/shared/ui";
+import { Notice, SubmitButton, useConfirm } from "@/shared/ui";
 import type { IssuedCredentials } from "../domain/credentials-share";
 import { CredentialsCard } from "./CredentialsCard";
 
@@ -32,13 +32,26 @@ export function AccountActionButton({
   const te = useTranslations("errors");
   const tc = useTranslations("common");
   const [state, formAction] = useActionState(action as Action, { status: "idle" } as ActionState<Result>);
+  const confirm = useConfirm();
+  const confirmed = useRef(false);
 
   return (
     <div className="flex flex-col gap-3">
       <form
         action={formAction}
         onSubmit={(event) => {
-          if (!window.confirm(confirmText)) event.preventDefault();
+          if (confirmed.current) {
+            confirmed.current = false;
+            return;
+          }
+          event.preventDefault();
+          const form = event.currentTarget;
+          // Suspendre ou désactiver (bouton discret) : ton « danger ».
+          void confirm({ message: confirmText, confirmLabel: label, tone: variant === "ghost" ? "danger" : "primary" }).then((ok) => {
+            if (!ok) return;
+            confirmed.current = true;
+            form.requestSubmit();
+          });
         }}
       >
         {Object.entries(fields).map(([name, value]) => (
